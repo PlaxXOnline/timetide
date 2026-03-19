@@ -1,15 +1,16 @@
 name: timetide
-description: "A new Flutter package project."
+description: "A comprehensive Flutter scheduling calendar package with 11 views, multi-resource scheduling, drag & drop, and RRULE recurrence."
 version: 0.0.1
 homepage:
 
 environment:
   sdk: ^3.11.1
-  flutter: ">=1.17.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  collection: ^1.19.0
 
 dev_dependencies:
   flutter_test:
