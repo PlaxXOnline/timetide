@@ -32,4 +32,10 @@ enum TideView {
 
   /// Yearly overview.
   year,
+
+  /// Resource day view — vertical time axis with one column per resource.
+  resourceDay,
+
+  /// Resource week view — vertical time axis with resource columns containing day sub-columns.
+  resourceWeek,
 }

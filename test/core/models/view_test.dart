@@ -3,8 +3,8 @@ import 'package:timetide/src/core/models/view.dart';
 
 void main() {
   group('TideView', () {
-    test('has exactly 11 values', () {
-      expect(TideView.values.length, 11);
+    test('has exactly 13 values', () {
+      expect(TideView.values.length, 13);
     });
 
     test('contains all expected values', () {
@@ -20,6 +20,8 @@ void main() {
         TideView.timelineMonth,
         TideView.multiWeek,
         TideView.year,
+        TideView.resourceDay,
+        TideView.resourceWeek,
       ]));
     });
   });

@@ -3,8 +3,12 @@
 Initial release of timetide.
 
 ### Views
-- 11 calendar views: day, week, work week, month, schedule, timeline day/week/work week/month, multi-week, year
-- Shared time axis and synchronized scrolling across timeline views
+- 13 calendar views: day, week, work week, month, schedule, timeline day/week/work week/month, multi-week, year, resource day, resource week
+- `TideResourceDayView` — vertical time axis with side-by-side resource columns and avatar+name headers
+- `TideResourceWeekView` — same layout with day sub-columns per resource and two-level headers
+- 2 new `TideView` enum values: `resourceDay`, `resourceWeek`
+- Shared time axis (`TideTimeAxis`) and synchronized scrolling (`TideScrollSync`) across timeline views
+- Timeline views migrated to the shared `TideScrollSync` utility, reducing duplication
 - All-day event panels with collapsible headers
 - Current time indicator
 
@@ -21,10 +25,15 @@ Initial release of timetide.
 - EXDATE and RDATE support
 
 ### Interaction
-- Custom drag & drop (no Flutter `Draggable`)
-- Event resize with snap-to-grid
-- Auto-scroll near viewport edges
-- External drag-in support
+- `TideDragHandler` wired end-to-end into all 7 drag-capable views (day, week, work week, timeline day, timeline week, timeline work week, resource day, resource week)
+- Platform-adaptive drag: long-press on mobile, click-and-drag on desktop
+- Cross-resource drag — dragging an event to a different resource column updates `resourceId` automatically
+- `TideResizeHandler` — event edge resize (drag start or end boundary) with snap-to-grid
+- `TideSnapEngine` — configurable grid snapping for both drag and resize
+- `TideConflictDetector` — live overlap detection computed during drag, before the event is committed
+- `TideAutoScroll` — edge-scrolling activates when the pointer approaches a viewport boundary
+- `TideExternalDragScope` — enables dragging events into the calendar from an external sidebar or widget tree
+- `TideTimeAxis` — pixel-to-time and time-to-pixel conversion abstraction shared by all time-based views
 - Event and date selection with rubber-band
 - Keyboard shortcuts and focus traversal
 - Undo/redo with configurable history

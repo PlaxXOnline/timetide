@@ -38,46 +38,49 @@ class TideViewSwitcherBar extends StatelessWidget {
       child: ValueListenableBuilder<TideView>(
         valueListenable: controller.currentViewNotifier,
         builder: (context, currentView, _) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final view in allowedViews)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Semantics(
-                    button: true,
-                    label: 'Switch to ${_viewName(view)} view',
-                    selected: view == currentView,
-                    child: GestureDetector(
-                      onTap: () => controller.currentView = view,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: view == currentView
-                              ? theme.primaryColor
-                              : null,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _viewName(view),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: view == currentView
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final view in allowedViews)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Semantics(
+                      button: true,
+                      label: 'Switch to ${_viewName(view)} view',
+                      selected: view == currentView,
+                      child: GestureDetector(
+                        onTap: () => controller.currentView = view,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
                             color: view == currentView
-                                ? const Color(0xFFFFFFFF)
-                                : theme.headerTextStyle.color,
+                                ? theme.primaryColor
+                                : null,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _viewName(view),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: view == currentView
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: view == currentView
+                                  ? const Color(0xFFFFFFFF)
+                                  : theme.headerTextStyle.color,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           );
         },
       ),
@@ -108,6 +111,10 @@ class TideViewSwitcherBar extends StatelessWidget {
         return _l10n.multiWeek;
       case TideView.year:
         return _l10n.year;
+      case TideView.resourceDay:
+        return _l10n.timelineDay;
+      case TideView.resourceWeek:
+        return _l10n.timelineWeek;
     }
   }
 }

@@ -62,6 +62,10 @@ export 'src/views/timeline_week/timeline_week_view.dart';
 export 'src/views/timeline_work_week/timeline_work_week_view.dart';
 export 'src/views/timeline_month/timeline_month_view.dart';
 
+// Views — Resource (vertical time axis, side-by-side resource columns)
+export 'src/views/resource_day/resource_day_view.dart';
+export 'src/views/resource_week/resource_week_view.dart';
+
 // Views — Multi-Week, Year, View Switcher
 export 'src/views/multi_week/multi_week_view.dart';
 export 'src/views/year/year_view.dart';
@@ -74,6 +78,7 @@ export 'src/interaction/drag_drop/auto_scroll.dart';
 export 'src/interaction/drag_drop/external_drag.dart';
 export 'src/interaction/drag_drop/snap_engine.dart';
 export 'src/interaction/drag_drop/conflict_detector.dart';
+export 'src/interaction/drag_drop/time_axis.dart';
 
 // Interaction — Selection
 export 'src/interaction/selection/event_selection.dart';
@@ -106,6 +111,7 @@ export 'src/widgets/resource_header/resource_load_indicator.dart';
 export 'src/widgets/common/tide_popup.dart';
 export 'src/widgets/common/tide_scrollbar.dart';
 export 'src/widgets/common/adaptive_layout.dart';
+export 'src/widgets/common/scroll_sync.dart';
 
 // Widgets — Context Menu
 export 'src/widgets/context_menu/tide_context_menu.dart';

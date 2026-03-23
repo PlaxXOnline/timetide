@@ -118,11 +118,13 @@ class TideCalendarHeader extends StatelessWidget {
     switch (view) {
       case TideView.day:
       case TideView.timelineDay:
+      case TideView.resourceDay:
         return '${months[date.month - 1]} ${date.day}, ${date.year}';
       case TideView.week:
       case TideView.timelineWeek:
       case TideView.workWeek:
       case TideView.timelineWorkWeek:
+      case TideView.resourceWeek:
       case TideView.schedule:
         final weekStart = date.subtract(Duration(days: date.weekday - 1));
         final weekEnd = weekStart.add(const Duration(days: 6));
