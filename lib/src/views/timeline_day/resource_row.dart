@@ -24,6 +24,7 @@ class TideResourceRow extends StatefulWidget {
     required this.endHour,
     required this.hourWidth,
     required this.rowHeight,
+    this.resourceId,
     this.timeRegions = const [],
     this.timeSlotInterval = const Duration(minutes: 60),
     this.overlapStrategy = TideOverlapStrategy.sideBySide,
@@ -55,6 +56,12 @@ class TideResourceRow extends StatefulWidget {
 
   /// Height of this resource row.
   final double rowHeight;
+
+  /// The resource ID this row represents.
+  ///
+  /// Passed through to [TideDragEndDetails.sourceResourceId] so the app
+  /// layer can correctly update multi-resource events on cross-resource drag.
+  final String? resourceId;
 
   /// Time regions applicable to this resource.
   final List<TideTimeRegion> timeRegions;
@@ -275,6 +282,7 @@ class _TideResourceRowState extends State<TideResourceRow> {
         event: event,
         controller: widget.controller!,
         timeAxis: timeAxis,
+        sourceResourceId: widget.resourceId,
         dragStartBehavior: widget.dragStartBehavior,
         snapInterval: widget.dragSnapInterval,
         existingEvents: widget.events,

@@ -819,6 +819,7 @@ class _ResourceDaySubColumnState extends State<_ResourceDaySubColumn> {
             newStart: newStart,
             newEnd: newEnd,
             newResourceId: newResourceId,
+            sourceResourceId: widget.resource.id,
             dropPosition: details.dropPosition,
           );
           // Call parent FIRST so the new position propagates before

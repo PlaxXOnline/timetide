@@ -36,6 +36,7 @@ class TideDragEndDetails {
     required this.newStart,
     required this.newEnd,
     this.newResourceId,
+    this.sourceResourceId,
     this.dropPosition,
   });
 
@@ -50,6 +51,13 @@ class TideDragEndDetails {
 
   /// The resource the event was dropped onto, if any.
   final String? newResourceId;
+
+  /// The resource the event was dragged FROM.
+  ///
+  /// Used together with [newResourceId] to correctly update multi-resource
+  /// events: replace only the source resource with the target, keeping
+  /// other resource assignments intact.
+  final String? sourceResourceId;
 
   /// The global screen position where the drop occurred.
   ///

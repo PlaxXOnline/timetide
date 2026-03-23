@@ -313,6 +313,7 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
 
         return TideResourceRow(
           key: _resourceRowKeys[resource.id],
+          resourceId: resource.id,
           events: resourceEvents,
           startHour: widget.startHour,
           endHour: widget.endHour,
@@ -342,6 +343,7 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
                     newStart: details.newStart,
                     newEnd: details.newEnd,
                     newResourceId: targetResourceId ?? resource.id,
+                    sourceResourceId: details.sourceResourceId,
                     dropPosition: details.dropPosition,
                   ));
                 }

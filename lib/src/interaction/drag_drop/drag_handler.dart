@@ -89,6 +89,7 @@ class TideDragHandler extends StatefulWidget {
     required this.controller,
     required this.child,
     this.timeAxis,
+    this.sourceResourceId,
     this.dragStartBehavior = TideDragStartBehavior.adaptive,
     this.snapInterval,
     this.onTap,
@@ -121,6 +122,13 @@ class TideDragHandler extends StatefulWidget {
   /// Required for proper time-based drag. When null, the handler
   /// reports the event's original times (backward-compatible).
   final TideTimeAxis? timeAxis;
+
+  /// The resource ID this event is displayed in.
+  ///
+  /// Passed through to [TideDragEndDetails.sourceResourceId] so the app
+  /// layer can perform a targeted resource replacement instead of
+  /// overwriting all resource assignments.
+  final String? sourceResourceId;
 
   /// Determines when the drag gesture begins.
   final TideDragStartBehavior dragStartBehavior;
@@ -538,6 +546,7 @@ class _TideDragHandlerState extends State<TideDragHandler> {
       event: widget.event,
       newStart: proposedStart,
       newEnd: proposedEnd,
+      sourceResourceId: widget.sourceResourceId,
       dropPosition: globalPosition,
     ));
   }

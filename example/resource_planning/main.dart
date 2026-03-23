@@ -241,12 +241,30 @@ class _ResourcePlanningScreenState extends State<ResourcePlanningScreen> {
         debugPrint('Empty slot tapped at: $dateTime');
       },
       onDragEnd: (TideDragEndDetails details) {
+        List<String>? updatedResourceIds = details.event.resourceIds;
+
+        if (details.newResourceId != null && updatedResourceIds != null) {
+          // Event has specific resource assignments — update them.
+          if (details.sourceResourceId != null &&
+              updatedResourceIds.contains(details.sourceResourceId)) {
+            // Replace only the source resource with the target.
+            updatedResourceIds = updatedResourceIds
+                .map((id) => id == details.sourceResourceId
+                    ? details.newResourceId!
+                    : id)
+                .toList();
+          } else {
+            // Single-resource or source unknown — assign to target.
+            updatedResourceIds = [details.newResourceId!];
+          }
+        }
+        // If resourceIds is null → stays null (event visible in all resources).
+        // Only the time changes.
+
         _datasource.updateEvent(details.event.copyWith(
           startTime: details.newStart,
           endTime: details.newEnd,
-          resourceIds: details.newResourceId != null
-              ? [details.newResourceId!]
-              : details.event.resourceIds,
+          resourceIds: updatedResourceIds,
         ));
       },
       onResizeEnd: (TideResizeEndDetails details) {

@@ -385,6 +385,7 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
                 child: Stack(
                   children: [
                     TideResourceRow(
+                      resourceId: resource.id,
                       events: dayEvents,
                       startHour: widget.startHour,
                       endHour: widget.endHour,
@@ -414,6 +415,7 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
                                 newEnd: details.newEnd,
                                 newResourceId:
                                     targetResourceId ?? resource.id,
+                                sourceResourceId: details.sourceResourceId,
                                 dropPosition: details.dropPosition,
                               ));
                             }
