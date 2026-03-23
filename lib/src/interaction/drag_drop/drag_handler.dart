@@ -6,7 +6,9 @@ import '../../core/controller.dart';
 import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import 'conflict_detector.dart';
+import 'resize_handler.dart' show TideResizeEndCallback;
 import 'snap_engine.dart';
+import 'time_axis.dart';
 
 /// Signature for the callback invoked when a drag starts.
 typedef TideDragStartCallback = void Function(TideEvent event, Offset offset);
@@ -28,20 +30,48 @@ typedef TideCanDropPredicate = bool Function(
     TideEvent event, DateTime proposedStart, DateTime proposedEnd,
     {String? proposedResourceId});
 
+/// Internal mode for distinguishing move vs resize gestures.
+enum _DragMode {
+  /// No active gesture.
+  none,
+
+  /// Moving the entire event.
+  move,
+
+  /// Resizing the start edge (top for vertical, left for horizontal).
+  resizeStart,
+
+  /// Resizing the end edge (bottom for vertical, right for horizontal).
+  resizeEnd,
+}
+
 /// Platform-adaptive drag handler for calendar events.
 ///
 /// Uses [GestureDetector] + [Listener] + [Overlay] for a fully custom drag
 /// implementation. **Never** uses Flutter's `Draggable`/`DragTarget`.
 ///
 /// Wraps a child widget and makes it draggable. During drag, a semi-transparent
-/// ghost preview follows the pointer via an [OverlayEntry].
+/// ghost preview follows the pointer via an [OverlayEntry] (when [showGhost]
+/// is true).
+///
+/// When [allowResize] is true, touches near the start/end edges of the event
+/// initiate a resize instead of a move. This eliminates the gesture-arena
+/// conflict that occurs when a separate [TideResizeHandler] wraps this widget.
 ///
 /// ```dart
 /// TideDragHandler(
 ///   event: myEvent,
 ///   controller: controller,
 ///   dragStartBehavior: TideDragStartBehavior.adaptive,
+///   allowResize: true,
 ///   onDragEnd: (details) async {
+///     controller.updateEvent(details.event.copyWith(
+///       startTime: details.newStart,
+///       endTime: details.newEnd,
+///     ));
+///     return true;
+///   },
+///   onResizeEnd: (details) async {
 ///     controller.updateEvent(details.event.copyWith(
 ///       startTime: details.newStart,
 ///       endTime: details.newEnd,
@@ -58,8 +88,10 @@ class TideDragHandler extends StatefulWidget {
     required this.event,
     required this.controller,
     required this.child,
+    this.timeAxis,
     this.dragStartBehavior = TideDragStartBehavior.adaptive,
     this.snapInterval,
+    this.onTap,
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd,
@@ -68,6 +100,12 @@ class TideDragHandler extends StatefulWidget {
     this.ghostBuilder,
     this.enabled = true,
     this.enableHapticFeedback = true,
+    this.showGhost = true,
+    this.longPressDuration = const Duration(milliseconds: 300),
+    this.allowResize = false,
+    this.resizeHandleSize = 8.0,
+    this.resizeDirection = TideResizeDirection.both,
+    this.onResizeEnd,
   });
 
   /// The event this handler is attached to.
@@ -79,11 +117,23 @@ class TideDragHandler extends StatefulWidget {
   /// The child widget to make draggable.
   final Widget child;
 
+  /// The time axis used to convert pixel positions to times.
+  /// Required for proper time-based drag. When null, the handler
+  /// reports the event's original times (backward-compatible).
+  final TideTimeAxis? timeAxis;
+
   /// Determines when the drag gesture begins.
   final TideDragStartBehavior dragStartBehavior;
 
   /// Grid interval for snapping. `null` means pixel-precise.
   final Duration? snapInterval;
+
+  /// Called when the event is tapped (not dragged).
+  ///
+  /// When provided, the handler's [GestureDetector] handles both tap and
+  /// drag gestures, avoiding the need for a nested [GestureDetector] on the
+  /// child widget. This eliminates gesture-arena conflicts.
+  final VoidCallback? onTap;
 
   /// Called when a drag starts.
   final TideDragStartCallback? onDragStart;
@@ -110,6 +160,37 @@ class TideDragHandler extends StatefulWidget {
   /// Whether to trigger haptic feedback on mobile when drag starts.
   final bool enableHapticFeedback;
 
+  /// Whether to show a floating ghost overlay during drag.
+  ///
+  /// When `false`, the view should handle visual feedback itself via the
+  /// [onDragUpdate] callback (e.g. by repositioning the event tile to the
+  /// proposed snap slot).
+  final bool showGhost;
+
+  /// Duration before a long press is recognized.
+  ///
+  /// Defaults to 300 ms for a snappier feel compared to Flutter's 500 ms
+  /// default.
+  final Duration longPressDuration;
+
+  /// Whether resize is enabled.
+  ///
+  /// When true, touches near the start/end edges of the event initiate a
+  /// resize instead of a move. This merges resize handling into the drag
+  /// handler to avoid gesture-arena conflicts with a separate resize widget.
+  final bool allowResize;
+
+  /// Size of the resize handles in logical pixels.
+  ///
+  /// Defines how many pixels from each edge count as the resize zone.
+  final double resizeHandleSize;
+
+  /// Which edges can be resized when [allowResize] is true.
+  final TideResizeDirection resizeDirection;
+
+  /// Called when a resize operation completes.
+  final TideResizeEndCallback? onResizeEnd;
+
   @override
   State<TideDragHandler> createState() => _TideDragHandlerState();
 }
@@ -122,10 +203,31 @@ class _TideDragHandlerState extends State<TideDragHandler> {
   Offset _currentDragOffset = Offset.zero;
   bool _isDragging = false;
 
+  /// The current gesture mode — move or resize.
+  _DragMode _dragMode = _DragMode.none;
+
+  /// Accumulated resize delta in logical pixels along the time axis.
+  double _resizeDragDelta = 0.0;
+
+  /// Previous drag position, used to compute incremental deltas for resize.
+  Offset _previousDragPosition = Offset.zero;
+
   /// Whether a Ctrl/Meta key is held (for copy-drag on desktop).
   ///
   /// Exposed to the view layer so it can differentiate move vs. copy.
   bool isCopyDrag = false;
+
+  /// The original event start time captured at drag start.
+  ///
+  /// Used instead of [widget.event.startTime] to avoid a double-delta bug:
+  /// when the view replaces the event with a display copy at the proposed
+  /// (snapped) position, [widget.event.startTime] changes every frame.
+  /// Adding the cumulative drag delta to that already-adjusted time would
+  /// double the movement, causing the event to fly away or oscillate.
+  DateTime? _originalStartTime;
+
+  /// The original event end time captured at drag start. See [_originalStartTime].
+  DateTime? _originalEndTime;
 
   @override
   void dispose() {
@@ -162,15 +264,36 @@ class _TideDragHandlerState extends State<TideDragHandler> {
     );
 
     if (useLongPress) {
-      return GestureDetector(
-        onLongPressStart: _onLongPressStart,
-        onLongPressMoveUpdate: _onLongPressMoveUpdate,
-        onLongPressEnd: _onLongPressEnd,
+      // Use RawGestureDetector with a custom long-press duration so we can
+      // make the activation faster than Flutter's default 500 ms.
+      return RawGestureDetector(
+        gestures: <Type, GestureRecognizerFactory>{
+          LongPressGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(
+              duration: widget.longPressDuration,
+            ),
+            (LongPressGestureRecognizer recognizer) {
+              recognizer
+                ..onLongPressStart = _onLongPressStart
+                ..onLongPressMoveUpdate = _onLongPressMoveUpdate
+                ..onLongPressEnd = _onLongPressEnd;
+            },
+          ),
+          TapGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+            (TapGestureRecognizer recognizer) {
+              recognizer.onTap = widget.onTap;
+            },
+          ),
+        },
         child: child,
       );
     }
 
     return GestureDetector(
+      onTap: widget.onTap,
       onPanStart: _onPanStart,
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
@@ -225,30 +348,122 @@ class _TideDragHandlerState extends State<TideDragHandler> {
 
   void _startDrag(Offset globalPosition) {
     if (_isDragging) return;
+
+    // Determine drag mode based on where the touch landed.
+    _dragMode = _resolveDragMode(globalPosition);
+
     _isDragging = true;
     dragStartOffset = globalPosition;
     _currentDragOffset = globalPosition;
+    _previousDragPosition = globalPosition;
+    _resizeDragDelta = 0.0;
+    _originalStartTime = widget.event.startTime;
+    _originalEndTime = widget.event.endTime;
 
     // Haptic feedback on touch devices.
     if (widget.enableHapticFeedback && _isTouchDevice(context)) {
-      HapticFeedback.mediumImpact();
+      if (_dragMode == _DragMode.move) {
+        HapticFeedback.mediumImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
     }
 
-    widget.onDragStart?.call(widget.event, globalPosition);
-    _insertGhost(globalPosition);
+    if (_dragMode == _DragMode.move) {
+      widget.onDragStart?.call(widget.event, globalPosition);
+      if (widget.showGhost) {
+        _insertGhost();
+      }
+    }
+  }
+
+  /// Determines whether the touch position is on a resize handle edge or
+  /// in the move zone (center).
+  _DragMode _resolveDragMode(Offset globalPosition) {
+    if (!widget.allowResize || widget.timeAxis == null) {
+      return _DragMode.move;
+    }
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return _DragMode.move;
+
+    final local = renderBox.globalToLocal(globalPosition);
+    final size = renderBox.size;
+    final isVertical = widget.timeAxis!.direction == Axis.vertical;
+    final pos = isVertical ? local.dy : local.dx;
+    final length = isVertical ? size.height : size.width;
+
+    final canResizeStart =
+        widget.resizeDirection == TideResizeDirection.both ||
+            widget.resizeDirection == TideResizeDirection.startOnly;
+    final canResizeEnd =
+        widget.resizeDirection == TideResizeDirection.both ||
+            widget.resizeDirection == TideResizeDirection.endOnly;
+
+    if (canResizeStart && pos <= widget.resizeHandleSize) {
+      return _DragMode.resizeStart;
+    }
+    if (canResizeEnd && pos >= length - widget.resizeHandleSize) {
+      return _DragMode.resizeEnd;
+    }
+
+    return _DragMode.move;
   }
 
   void _updateDrag(Offset globalPosition) {
     if (!_isDragging) return;
     _currentDragOffset = globalPosition;
-    _updateGhostPosition(globalPosition);
 
-    // Compute proposed time for conflict detection.
-    // The actual time mapping depends on the view's pixel-to-time ratio,
-    // which the view layer will provide. Here we use the event's original
-    // times for conflict detection; the view overrides via onDragUpdate.
-    final proposedStart = widget.event.startTime;
-    final proposedEnd = widget.event.endTime;
+    if (_dragMode == _DragMode.move) {
+      _updateMoveDrag(globalPosition);
+    } else {
+      // Resize mode — accumulate delta along the time axis.
+      if (widget.timeAxis != null) {
+        final delta = globalPosition - _previousDragPosition;
+        _resizeDragDelta += widget.timeAxis!.direction == Axis.vertical
+            ? delta.dy
+            : delta.dx;
+      }
+    }
+
+    _previousDragPosition = globalPosition;
+  }
+
+  void _updateMoveDrag(Offset globalPosition) {
+    if (widget.showGhost) {
+      _updateGhostPosition();
+    }
+
+    // Convert pixel delta to time delta using the time axis.
+    DateTime proposedStart;
+    DateTime proposedEnd;
+
+    if (widget.timeAxis != null) {
+      final axis = widget.timeAxis!;
+
+      // Compute delta from RAW GLOBAL positions — these are stable and
+      // don't depend on the event tile's current position (which moves
+      // during snap-to-slot, causing oscillation if we used globalToLocal).
+      final globalDelta = globalPosition - dragStartOffset;
+      final pixelDelta = axis.offsetToPixel(globalDelta);
+
+      // Convert pixel delta to time delta using two reference points.
+      // Since pixelToTime is linear, pixelToTime(d) - pixelToTime(0)
+      // gives us the exact Duration for d pixels.
+      final baseTime = axis.pixelToTime(0);
+      final deltaTime = axis.pixelToTime(pixelDelta);
+      final delta = deltaTime.difference(baseTime);
+
+      proposedStart = _originalStartTime!.add(delta);
+      proposedEnd = _originalEndTime!.add(delta);
+    } else {
+      proposedStart = _originalStartTime ?? widget.event.startTime;
+      proposedEnd = _originalEndTime ?? widget.event.endTime;
+    }
+
+    // Apply snap during update for live feedback.
+    proposedStart = TideSnapEngine.snapToGrid(proposedStart, widget.snapInterval);
+    proposedEnd = TideSnapEngine.snapToGrid(proposedEnd, widget.snapInterval);
 
     final conflicts = TideConflictDetector.detectConflicts(
       draggedEvent: widget.event,
@@ -261,54 +476,117 @@ class _TideDragHandlerState extends State<TideDragHandler> {
       event: widget.event,
       proposedStart: proposedStart,
       conflicts: conflicts.map((c) => c.eventB).toList(),
+      globalPosition: globalPosition,
     ));
-
-    // Multi-select: if additional events are selected, the view layer is
-    // responsible for moving them with their relative offsets using
-    // controller.selectedEvents and the delta from dragStartOffset.
-    // This keeps the handler focused on single-event mechanics.
-    _isDragging = true; // keep state valid
   }
 
   void _endDrag(Offset globalPosition) {
     if (!_isDragging) return;
     _isDragging = false;
+
+    if (_dragMode == _DragMode.move) {
+      _endMoveDrag(globalPosition);
+    } else {
+      _endResizeDrag();
+    }
+
+    _dragMode = _DragMode.none;
+    _originalStartTime = null;
+    _originalEndTime = null;
+  }
+
+  void _endMoveDrag(Offset globalPosition) {
     _removeGhost();
 
-    // Snap proposed times.
-    final proposedStart = TideSnapEngine.snapToGrid(
-      widget.event.startTime,
-      widget.snapInterval,
-    );
-    final proposedEnd = TideSnapEngine.snapToGrid(
-      widget.event.endTime,
-      widget.snapInterval,
-    );
+    DateTime proposedStart;
+    DateTime proposedEnd;
+
+    if (widget.timeAxis != null) {
+      final axis = widget.timeAxis!;
+
+      // Compute delta from RAW GLOBAL positions — these are stable and
+      // don't depend on the event tile's current position (which moves
+      // during snap-to-slot, causing oscillation if we used globalToLocal).
+      final globalDelta = globalPosition - dragStartOffset;
+      final pixelDelta = axis.offsetToPixel(globalDelta);
+
+      // Convert pixel delta to time delta using two reference points.
+      // Since pixelToTime is linear, pixelToTime(d) - pixelToTime(0)
+      // gives us the exact Duration for d pixels.
+      final baseTime = axis.pixelToTime(0);
+      final deltaTime = axis.pixelToTime(pixelDelta);
+      final delta = deltaTime.difference(baseTime);
+
+      proposedStart = _originalStartTime!.add(delta);
+      proposedEnd = _originalEndTime!.add(delta);
+    } else {
+      proposedStart = _originalStartTime ?? widget.event.startTime;
+      proposedEnd = _originalEndTime ?? widget.event.endTime;
+    }
+
+    // Snap to grid.
+    proposedStart = TideSnapEngine.snapToGrid(proposedStart, widget.snapInterval);
+    proposedEnd = TideSnapEngine.snapToGrid(proposedEnd, widget.snapInterval);
 
     // Validate drop.
     if (widget.canDropAt != null &&
         !widget.canDropAt!(widget.event, proposedStart, proposedEnd)) {
-      return; // Snap-back: ghost already removed.
+      return;
     }
 
-    final details = TideDragEndDetails(
+    widget.onDragEnd?.call(TideDragEndDetails(
       event: widget.event,
       newStart: proposedStart,
       newEnd: proposedEnd,
-    );
+      dropPosition: globalPosition,
+    ));
+  }
 
-    widget.onDragEnd?.call(details);
+  void _endResizeDrag() {
+    final originalStart = _originalStartTime ?? widget.event.startTime;
+    final originalEnd = _originalEndTime ?? widget.event.endTime;
+    var newStart = originalStart;
+    var newEnd = originalEnd;
+
+    if (widget.timeAxis != null) {
+      if (_dragMode == _DragMode.resizeStart) {
+        final startPixel = widget.timeAxis!.timeToPixel(originalStart);
+        newStart = widget.timeAxis!.pixelToTime(startPixel + _resizeDragDelta);
+      } else {
+        final endPixel = widget.timeAxis!.timeToPixel(originalEnd);
+        newEnd = widget.timeAxis!.pixelToTime(endPixel + _resizeDragDelta);
+      }
+    }
+
+    newStart = TideSnapEngine.snapToGrid(newStart, widget.snapInterval);
+    newEnd = TideSnapEngine.snapToGrid(newEnd, widget.snapInterval);
+
+    // Prevent inverted range.
+    if (newEnd.isBefore(newStart) || newEnd.isAtSameMomentAs(newStart)) {
+      final minDuration = widget.snapInterval ?? const Duration(minutes: 15);
+      if (_dragMode == _DragMode.resizeStart) {
+        newStart = newEnd.subtract(minDuration);
+      } else {
+        newEnd = newStart.add(minDuration);
+      }
+    }
+
+    widget.onResizeEnd?.call(TideResizeEndDetails(
+      event: widget.event,
+      newStart: newStart,
+      newEnd: newEnd,
+    ));
   }
 
   // ─── Ghost Overlay ─────────────────────────────────────
 
-  void _insertGhost(Offset position) {
+  void _insertGhost() {
     _removeGhost();
     _ghostEntry = OverlayEntry(
       builder: (context) {
         return Positioned(
-          left: position.dx - 40,
-          top: position.dy - 20,
+          left: _currentDragOffset.dx - 40,
+          top: _currentDragOffset.dy - 20,
           child: IgnorePointer(
             child: Opacity(
               opacity: 0.5,
@@ -322,11 +600,8 @@ class _TideDragHandlerState extends State<TideDragHandler> {
     Overlay.of(context).insert(_ghostEntry!);
   }
 
-  void _updateGhostPosition(Offset position) {
+  void _updateGhostPosition() {
     _ghostEntry?.markNeedsBuild();
-    // The builder reads _currentDragOffset implicitly since we rebuild.
-    _removeGhost();
-    _insertGhost(position);
   }
 
   void _removeGhost() {

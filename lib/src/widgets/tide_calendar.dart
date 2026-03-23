@@ -7,6 +7,7 @@ import '../core/models/event.dart';
 import '../core/models/resource.dart';
 import '../core/models/view.dart';
 import '../core/presets.dart';
+import '../interaction/drag_drop/external_drag.dart';
 import '../interaction/keyboard/shortcut_handler.dart';
 import '../l10n/tide_localizations.dart';
 import '../rendering/event_layout_engine.dart';
@@ -20,6 +21,8 @@ import '../views/timeline_day/timeline_day_view.dart';
 import '../views/timeline_month/timeline_month_view.dart';
 import '../views/timeline_week/timeline_week_view.dart';
 import '../views/timeline_work_week/timeline_work_week_view.dart';
+import '../views/resource_day/resource_day_view.dart';
+import '../views/resource_week/resource_week_view.dart';
 import '../views/view_switcher.dart';
 import '../views/week/week_view.dart';
 import '../views/work_week/work_week_view.dart';
@@ -392,7 +395,7 @@ class _TideCalendarState extends State<TideCalendar> {
 
     return Semantics(
       label: 'Calendar',
-      child: body,
+      child: TideExternalDragScope(child: body),
     );
   }
 
@@ -420,6 +423,12 @@ class _TideCalendarState extends State<TideCalendar> {
           onEmptySlotTap: widget.onEmptySlotTap,
           eventBuilder: widget.eventBuilder,
           allDayEventBuilder: widget.allDayEventBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.week:
         return TideWeekView(
@@ -433,6 +442,12 @@ class _TideCalendarState extends State<TideCalendar> {
           eventBuilder: widget.eventBuilder,
           allDayEventBuilder: widget.allDayEventBuilder,
           firstDayOfWeek: widget.firstDayOfWeek ?? DateTime.monday,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.workWeek:
         return TideWorkWeekView(
@@ -445,6 +460,12 @@ class _TideCalendarState extends State<TideCalendar> {
           onEmptySlotTap: widget.onEmptySlotTap,
           eventBuilder: widget.eventBuilder,
           allDayEventBuilder: widget.allDayEventBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.month:
         return TideMonthView(
@@ -469,6 +490,12 @@ class _TideCalendarState extends State<TideCalendar> {
           onEventTap: widget.onEventTap,
           onEmptySlotTap: widget.onEmptySlotTap,
           resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.timelineWeek:
         return TideTimelineWeekView(
@@ -478,6 +505,12 @@ class _TideCalendarState extends State<TideCalendar> {
           resourceHeaderWidth: widget.resourceHeaderWidth,
           onEventTap: widget.onEventTap,
           resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.timelineWorkWeek:
         return TideTimelineWorkWeekView(
@@ -487,6 +520,12 @@ class _TideCalendarState extends State<TideCalendar> {
           resourceHeaderWidth: widget.resourceHeaderWidth,
           onEventTap: widget.onEventTap,
           resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.timelineMonth:
         return TideTimelineMonthView(
@@ -506,6 +545,45 @@ class _TideCalendarState extends State<TideCalendar> {
         return TideYearView(
           controller: _controller,
           onDayTap: widget.onDateTap,
+        );
+      case TideView.resourceDay:
+        return TideResourceDayView(
+          controller: _controller,
+          timeSlotInterval: widget.timeSlotInterval,
+          startHour: widget.startHour,
+          endHour: widget.endHour,
+          eventOverlapStrategy: widget.eventOverlapStrategy,
+          onEventTap: widget.onEventTap,
+          onEmptySlotTap: widget.onEmptySlotTap,
+          eventBuilder: widget.eventBuilder,
+          allDayEventBuilder: widget.allDayEventBuilder,
+          resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
+        );
+      case TideView.resourceWeek:
+        return TideResourceWeekView(
+          controller: _controller,
+          timeSlotInterval: widget.timeSlotInterval,
+          startHour: widget.startHour,
+          endHour: widget.endHour,
+          eventOverlapStrategy: widget.eventOverlapStrategy,
+          onEventTap: widget.onEventTap,
+          onEmptySlotTap: widget.onEmptySlotTap,
+          eventBuilder: widget.eventBuilder,
+          allDayEventBuilder: widget.allDayEventBuilder,
+          resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
+          firstDayOfWeek: widget.firstDayOfWeek ?? DateTime.monday,
         );
     }
   }

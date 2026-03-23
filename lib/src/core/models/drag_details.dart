@@ -1,4 +1,4 @@
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, Offset;
 
 import 'event.dart';
 
@@ -36,6 +36,7 @@ class TideDragEndDetails {
     required this.newStart,
     required this.newEnd,
     this.newResourceId,
+    this.dropPosition,
   });
 
   /// The event that was dragged.
@@ -49,6 +50,12 @@ class TideDragEndDetails {
 
   /// The resource the event was dropped onto, if any.
   final String? newResourceId;
+
+  /// The global screen position where the drop occurred.
+  ///
+  /// Used by parent views (e.g. timeline views) to resolve which resource
+  /// row the event was dropped on for cross-resource drag.
+  final Offset? dropPosition;
 }
 
 /// Details provided when a resize operation completes.
@@ -82,6 +89,7 @@ class TideDragUpdateDetails {
     required this.proposedStart,
     this.proposedResourceId,
     this.conflicts = const [],
+    this.globalPosition,
   });
 
   /// The event currently being dragged.
@@ -95,6 +103,9 @@ class TideDragUpdateDetails {
 
   /// Events that conflict with the proposed drop slot.
   final List<TideEvent> conflicts;
+
+  /// The current global pointer position during the drag.
+  final Offset? globalPosition;
 }
 
 /// Data payload for an event dragged in from an external source.

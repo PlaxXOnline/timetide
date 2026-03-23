@@ -5,6 +5,7 @@ import 'package:timetide/src/core/datasource_in_memory.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/core/models/view.dart';
 import 'package:timetide/src/widgets/tide_calendar.dart';
+import 'package:timetide/src/core/models/drag_details.dart';
 
 /// Minimal timetide example — InMemoryDatasource with sample events.
 void main() {
@@ -107,10 +108,26 @@ class _BasicCalendarScreenState extends State<BasicCalendarScreen> {
       allowedViews: [TideView.day, TideView.week, TideView.month],
       startHour: 7,
       endHour: 20,
+      allowDragAndDrop: true,
+      allowResize: true,
       onEventTap: (event) {
         // ignore: avoid_print
-        // ignore: avoid_print
         debugPrint('Tapped: ${event.subject}');
+      },
+      onDragEnd: (TideDragEndDetails details) {
+        _datasource.updateEvent(details.event.copyWith(
+          startTime: details.newStart,
+          endTime: details.newEnd,
+          resourceIds: details.newResourceId != null
+              ? [details.newResourceId!]
+              : details.event.resourceIds,
+        ));
+      },
+      onResizeEnd: (TideResizeEndDetails details) {
+        _datasource.updateEvent(details.event.copyWith(
+          startTime: details.newStart,
+          endTime: details.newEnd,
+        ));
       },
     );
   }

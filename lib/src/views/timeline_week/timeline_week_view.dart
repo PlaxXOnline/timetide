@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
+import '../../widgets/common/scroll_sync.dart';
 import '../../core/models/event.dart';
 import '../../core/models/resource.dart';
 import '../../core/models/time_region.dart';
@@ -35,6 +37,12 @@ class TideTimelineWeekView extends StatefulWidget {
     this.onEmptySlotTap,
     this.resourceHeaderBuilder,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, data, and selection.
@@ -79,6 +87,24 @@ class TideTimelineWeekView extends StatefulWidget {
   /// Custom builder for event tiles.
   final Widget Function(BuildContext, TideEvent, TideEventBounds)? eventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   State<TideTimelineWeekView> createState() => _TideTimelineWeekViewState();
 }
@@ -91,6 +117,9 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
   List<TideEvent> _events = [];
   List<TideTimeRegion> _timeRegions = [];
   bool _isLoading = true;
+
+  /// GlobalKeys for resource rows — used for cross-resource drag hit-testing.
+  final Map<String, GlobalKey> _resourceRowKeys = {};
 
   int get _numberOfDays => 7;
 
@@ -151,6 +180,10 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
       _events = results[1] as List<TideEvent>;
       _timeRegions = results[2] as List<TideTimeRegion>;
       _isLoading = false;
+
+      for (final r in _resources) {
+        _resourceRowKeys.putIfAbsent(r.id, GlobalKey.new);
+      }
     });
   }
 
@@ -324,6 +357,7 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
 
         // Build a row spanning all 7 days for this resource.
         return SizedBox(
+          key: _resourceRowKeys[resource.id],
           height: widget.resourceRowHeight,
           child: Row(
             children: days.map((day) {
@@ -361,6 +395,30 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
                       showDivider: widget.showResourceDividers,
                       onEventTap: widget.onEventTap,
                       eventBuilder: widget.eventBuilder,
+                      controller: widget.controller,
+                      date: day,
+                      allowDragAndDrop: widget.allowDragAndDrop,
+                      allowResize: widget.allowResize,
+                      dragSnapInterval: widget.dragSnapInterval,
+                      dragStartBehavior: widget.dragStartBehavior,
+                      onDragEnd: widget.onDragEnd != null
+                          ? (details) {
+                              final targetResourceId =
+                                  details.dropPosition != null
+                                      ? _resolveResourceAtPosition(
+                                          details.dropPosition!)
+                                      : null;
+                              widget.onDragEnd!(TideDragEndDetails(
+                                event: details.event,
+                                newStart: details.newStart,
+                                newEnd: details.newEnd,
+                                newResourceId:
+                                    targetResourceId ?? resource.id,
+                                dropPosition: details.dropPosition,
+                              ));
+                            }
+                          : null,
+                      onResizeEnd: widget.onResizeEnd,
                     ),
                     // Day separator line.
                     Positioned(
@@ -380,6 +438,20 @@ class _TideTimelineWeekViewState extends State<TideTimelineWeekView> {
         );
       }).toList(),
     );
+  }
+
+  /// Determines which resource row contains the given global position.
+  String? _resolveResourceAtPosition(Offset globalPosition) {
+    for (final entry in _resourceRowKeys.entries) {
+      final renderBox =
+          entry.value.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) continue;
+      final local = renderBox.globalToLocal(globalPosition);
+      if (renderBox.paintBounds.contains(local)) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 
   bool _isToday(DateTime date) {
@@ -463,63 +535,29 @@ class _SyncedScrollArea extends StatefulWidget {
 class _SyncedScrollAreaState extends State<_SyncedScrollArea> {
   final ScrollController _localH = ScrollController();
   final ScrollController _localV = ScrollController();
-  bool _syncH = false;
-  bool _syncV = false;
+  late final TideScrollSync _hSync;
+  late final TideScrollSync _vSync;
 
   @override
   void initState() {
     super.initState();
-    _localH.addListener(_onLocalH);
-    _localV.addListener(_onLocalV);
-    widget.horizontalController.addListener(_onExtH);
-    widget.verticalController.addListener(_onExtV);
+    _hSync = TideScrollSync(
+      primary: _localH,
+      secondary: widget.horizontalController,
+    );
+    _vSync = TideScrollSync(
+      primary: _localV,
+      secondary: widget.verticalController,
+    );
   }
 
   @override
   void dispose() {
-    _localH.removeListener(_onLocalH);
-    _localV.removeListener(_onLocalV);
-    widget.horizontalController.removeListener(_onExtH);
-    widget.verticalController.removeListener(_onExtV);
+    _hSync.dispose();
+    _vSync.dispose();
     _localH.dispose();
     _localV.dispose();
     super.dispose();
-  }
-
-  void _onLocalH() {
-    if (_syncH) return;
-    _syncH = true;
-    if (widget.horizontalController.hasClients) {
-      widget.horizontalController.jumpTo(_localH.offset);
-    }
-    _syncH = false;
-  }
-
-  void _onExtH() {
-    if (_syncH) return;
-    _syncH = true;
-    if (_localH.hasClients) {
-      _localH.jumpTo(widget.horizontalController.offset);
-    }
-    _syncH = false;
-  }
-
-  void _onLocalV() {
-    if (_syncV) return;
-    _syncV = true;
-    if (widget.verticalController.hasClients) {
-      widget.verticalController.jumpTo(_localV.offset);
-    }
-    _syncV = false;
-  }
-
-  void _onExtV() {
-    if (_syncV) return;
-    _syncV = true;
-    if (_localV.hasClients) {
-      _localV.jumpTo(widget.verticalController.offset);
-    }
-    _syncV = false;
   }
 
   @override

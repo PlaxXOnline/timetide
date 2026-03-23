@@ -1,10 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timetide/src/core/controller.dart';
+import 'package:timetide/src/core/models/drag_details.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/interaction/drag_drop/conflict_detector.dart';
 import 'package:timetide/src/interaction/drag_drop/drag_handler.dart';
 import 'package:timetide/src/interaction/drag_drop/snap_engine.dart';
+import 'package:timetide/src/interaction/drag_drop/time_axis.dart';
 
 void main() {
   // ─── TideSnapEngine ────────────────────────────────────
@@ -338,6 +340,68 @@ void main() {
       );
 
       expect(find.text('Event'), findsOneWidget);
+    });
+
+    testWidgets('accepts optional TideTimeAxis parameter', (tester) async {
+      final event = TideEvent(
+        id: '1',
+        subject: 'Test Event',
+        startTime: DateTime(2024, 1, 1, 10, 0),
+        endTime: DateTime(2024, 1, 1, 11, 0),
+      );
+      final controller = TideController();
+      addTearDown(controller.dispose);
+
+      final axis = TideTimeAxis.vertical(
+        date: DateTime(2024, 1, 1),
+        startHour: 0,
+        hourHeight: 60,
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TideDragHandler(
+            event: event,
+            controller: controller,
+            timeAxis: axis,
+            child: const SizedBox(width: 100, height: 60),
+          ),
+        ),
+      );
+
+      expect(find.byType(TideDragHandler), findsOneWidget);
+    });
+
+    testWidgets('builds correctly without timeAxis (backward-compatible)', (tester) async {
+      final event = TideEvent(
+        id: '1',
+        subject: 'Test Event',
+        startTime: DateTime(2024, 1, 1, 10, 0),
+        endTime: DateTime(2024, 1, 1, 11, 0),
+      );
+      final controller = TideController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TideDragHandler(
+            event: event,
+            controller: controller,
+            // No timeAxis — backward-compatible mode.
+            child: const SizedBox(width: 100, height: 60),
+          ),
+        ),
+      );
+
+      // Widget builds without timeAxis; handler reports original times.
+      // Uses either GestureDetector (desktop/pan) or RawGestureDetector
+      // (touch/long-press) depending on test environment pixel ratio.
+      expect(find.byType(TideDragHandler), findsOneWidget);
+      final hasGesture = find.byType(GestureDetector).evaluate().isNotEmpty;
+      final hasRawGesture = find.byType(RawGestureDetector).evaluate().isNotEmpty;
+      expect(hasGesture || hasRawGesture, isTrue);
     });
   });
 }

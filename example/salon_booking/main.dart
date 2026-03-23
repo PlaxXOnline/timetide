@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/widgets.dart';
 import 'package:timetide/src/core/controller.dart';
+import 'package:timetide/src/core/models/drag_details.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/core/models/view.dart';
 import 'package:timetide/src/core/presets.dart';
@@ -149,6 +150,21 @@ class _SalonBookingScreenState extends State<SalonBookingScreen> {
                     ],
                     themeData: _theme,
                     onEventTap: _onEventTap,
+                    onDragEnd: (TideDragEndDetails details) {
+                      _datasource.updateEvent(details.event.copyWith(
+                        startTime: details.newStart,
+                        endTime: details.newEnd,
+                        resourceIds: details.newResourceId != null
+                            ? [details.newResourceId!]
+                            : details.event.resourceIds,
+                      ));
+                    },
+                    onResizeEnd: (TideResizeEndDetails details) {
+                      _datasource.updateEvent(details.event.copyWith(
+                        startTime: details.newStart,
+                        endTime: details.newEnd,
+                      ));
+                    },
                   ),
                 ),
               ],

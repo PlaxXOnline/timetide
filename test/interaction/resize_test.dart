@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:timetide/src/core/models/drag_details.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/interaction/drag_drop/resize_handler.dart';
+import 'package:timetide/src/interaction/drag_drop/time_axis.dart';
 
 void main() {
   group('TideResizeHandler', () {
@@ -147,6 +148,59 @@ void main() {
       );
 
       expect(find.byType(Semantics), findsWidgets);
+    });
+
+    testWidgets('accepts optional TideTimeAxis parameter', (tester) async {
+      final axis = TideTimeAxis.vertical(
+        date: DateTime(2024, 1, 1),
+        startHour: 0,
+        hourHeight: 60,
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 200,
+            height: 100,
+            child: TideResizeHandler(
+              event: event,
+              timeAxis: axis,
+              child: const Center(child: Text('Event')),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TideResizeHandler), findsOneWidget);
+    });
+
+    testWidgets('builds correctly without timeAxis (backward-compatible)', (tester) async {
+      // Verify TideResizeHandler constructs and renders without timeAxis.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: TideResizeHandler(
+              event: event,
+              resizeDirection: TideResizeDirection.endOnly,
+              onResizeEnd: (details) async {
+                // Without timeAxis, original times are reported.
+                expect(details.newStart, event.startTime);
+                expect(details.newEnd, event.endTime);
+                return true;
+              },
+              child: const Center(child: Text('Event')),
+            ),
+          ),
+        ),
+      );
+
+      // Widget builds successfully without timeAxis parameter.
+      expect(find.byType(TideResizeHandler), findsOneWidget);
+      expect(find.byType(MouseRegion), findsOneWidget);
     });
   });
 

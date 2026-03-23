@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import '../../rendering/event_layout_engine.dart';
 import '../week/week_view.dart';
@@ -28,6 +29,12 @@ class TideWorkWeekView extends StatelessWidget {
     this.onEmptySlotTap,
     this.eventBuilder,
     this.allDayEventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, selection, and data.
@@ -76,6 +83,24 @@ class TideWorkWeekView extends StatelessWidget {
   final Widget Function(BuildContext context, TideEvent event)?
       allDayEventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   Widget build(BuildContext context) {
     return TideWeekView(
@@ -96,6 +121,12 @@ class TideWorkWeekView extends StatelessWidget {
       onEmptySlotTap: onEmptySlotTap,
       eventBuilder: eventBuilder,
       allDayEventBuilder: allDayEventBuilder,
+      allowDragAndDrop: allowDragAndDrop,
+      allowResize: allowResize,
+      dragSnapInterval: dragSnapInterval,
+      dragStartBehavior: dragStartBehavior,
+      onDragEnd: onDragEnd,
+      onResizeEnd: onResizeEnd,
     );
   }
 }

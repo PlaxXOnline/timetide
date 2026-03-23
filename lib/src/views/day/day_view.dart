@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import '../../core/models/time_region.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
+import '../../interaction/drag_drop/resize_handler.dart';
+import '../../interaction/drag_drop/time_axis.dart';
 import '../../rendering/current_time_painter.dart';
 import '../../rendering/event_layout_engine.dart';
 import '../../rendering/time_region_painter.dart';
@@ -43,6 +47,12 @@ class TideDayView extends StatefulWidget {
     this.onEmptySlotTap,
     this.eventBuilder,
     this.allDayEventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, selection, and data.
@@ -94,6 +104,24 @@ class TideDayView extends StatefulWidget {
   final Widget Function(BuildContext context, TideEvent event)?
       allDayEventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   State<TideDayView> createState() => _TideDayViewState();
 }
@@ -104,6 +132,13 @@ class _TideDayViewState extends State<TideDayView> {
   List<TideEvent> _events = const [];
   List<TideTimeRegion> _timeRegions = const [];
   bool _allDayPanelExpanded = true;
+
+  // ─── Live snap-to-slot state ───────────────────────────
+  /// The event currently being dragged, or `null`.
+  TideEvent? _draggingEvent;
+
+  /// The snapped proposed start time during an active drag.
+  DateTime? _dragProposedStart;
 
   @override
   void initState() {
@@ -316,11 +351,30 @@ class _TideDayViewState extends State<TideDayView> {
     List<TideEvent> timedEvents,
     double totalHeight,
   ) {
+    final timeAxis = TideTimeAxis.vertical(
+      date: date,
+      startHour: widget.startHour,
+      hourHeight: widget.hourHeight,
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
+
+        // Substitute the dragged event with its proposed position so the
+        // layout engine places it at the snap slot.
+        final displayEvents = timedEvents.map((e) {
+          if (_draggingEvent?.id == e.id && _dragProposedStart != null) {
+            return e.copyWith(
+              startTime: _dragProposedStart!,
+              endTime: _dragProposedStart!.add(e.duration),
+            );
+          }
+          return e;
+        }).toList();
+
         final layoutResults = TideDayViewLayout.layoutEvents(
-          events: timedEvents,
+          events: displayEvents,
           strategy: widget.eventOverlapStrategy,
           startHour: widget.startHour,
           endHour: widget.endHour,
@@ -361,7 +415,7 @@ class _TideDayViewState extends State<TideDayView> {
                   top: result.bounds.top,
                   width: result.bounds.width,
                   height: result.bounds.height,
-                  child: _buildEventTile(context, theme, result.event),
+                  child: _buildEventTile(context, theme, result.event, timeAxis),
                 ),
 
               // Current time indicator (non-interactive overlay)
@@ -418,32 +472,40 @@ class _TideDayViewState extends State<TideDayView> {
     BuildContext context,
     TideThemeData theme,
     TideEvent event,
+    TideTimeAxis timeAxis,
   ) {
+    final isDragging = _draggingEvent?.id == event.id;
+
+    // Build the visual content — either custom or default.
+    Widget tile;
     if (widget.eventBuilder != null) {
-      return widget.eventBuilder!(context, event);
-    }
+      tile = widget.eventBuilder!(context, event);
+    } else {
+      final color = event.color ?? theme.primaryColor;
+      final isSelected = widget.controller.selectedEvents.contains(event);
 
-    final color = event.color ?? theme.primaryColor;
-    final isSelected = widget.controller.selectedEvents.contains(event);
-
-    return Semantics(
-      label: 'Event: ${event.subject}',
-      button: true,
-      child: GestureDetector(
-        onTap:
-            widget.onEventTap != null ? () => widget.onEventTap!(event) : null,
+      // When drag is enabled, tap is handled by TideDragHandler below,
+      // so the tile itself does not need a GestureDetector.
+      final tileContent = Semantics(
+        label: 'Event: ${event.subject}',
+        button: true,
         child: Container(
           margin: EdgeInsets.only(right: theme.eventSpacing),
           padding: theme.eventPadding,
           decoration: BoxDecoration(
             color: color,
             borderRadius: theme.eventBorderRadius,
-            border: isSelected
+            border: isDragging
                 ? Border.all(
                     color: theme.selectionColor,
                     width: 2,
                   )
-                : null,
+                : isSelected
+                    ? Border.all(
+                        color: theme.selectionColor,
+                        width: 2,
+                      )
+                    : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,8 +525,92 @@ class _TideDayViewState extends State<TideDayView> {
             ],
           ),
         ),
-      ),
-    );
+      );
+
+      if (widget.allowDragAndDrop) {
+        // Tap is forwarded via TideDragHandler.onTap to avoid nested
+        // GestureDetectors competing for the same gesture.
+        tile = tileContent;
+      } else {
+        tile = GestureDetector(
+          onTap: widget.onEventTap != null
+              ? () => widget.onEventTap!(event)
+              : null,
+          child: tileContent,
+        );
+      }
+    }
+
+    // Apply reduced opacity when this event is being dragged.
+    if (isDragging) {
+      tile = Opacity(opacity: 0.7, child: tile);
+    }
+
+    // ALWAYS wrap with drag handler if enabled (includes resize when
+    // allowResize is true — merged to avoid gesture-arena conflicts).
+    if (widget.allowDragAndDrop) {
+      tile = TideDragHandler(
+        event: event,
+        controller: widget.controller,
+        timeAxis: timeAxis,
+        dragStartBehavior: widget.dragStartBehavior,
+        snapInterval: widget.dragSnapInterval,
+        existingEvents: _events,
+        showGhost: false,
+        allowResize: widget.allowResize,
+        resizeHandleSize: 8.0,
+        onResizeEnd: widget.onResizeEnd != null
+            ? (details) async {
+                widget.onResizeEnd!(details);
+                return true;
+              }
+            : null,
+        onTap: widget.onEventTap != null
+            ? () => widget.onEventTap!(event)
+            : null,
+        onDragStart: (dragEvent, offset) {
+          setState(() {
+            _draggingEvent = dragEvent;
+            _dragProposedStart = dragEvent.startTime;
+          });
+        },
+        onDragUpdate: (details) {
+          setState(() {
+            _draggingEvent = details.event;
+            _dragProposedStart = details.proposedStart;
+          });
+        },
+        onDragEnd: (details) async {
+          // Update datasource FIRST so the new position propagates before
+          // we clear the drag visual state. This prevents snap-back flicker.
+          widget.onDragEnd?.call(details);
+          // Wait one microtask for stream events to propagate.
+          await Future<void>.delayed(Duration.zero);
+          if (mounted) {
+            setState(() {
+              _draggingEvent = null;
+              _dragProposedStart = null;
+            });
+          }
+          return true;
+        },
+        child: tile,
+      );
+    } else if (widget.allowResize) {
+      // Resize-only (no drag) — use standalone TideResizeHandler.
+      tile = TideResizeHandler(
+        event: event,
+        timeAxis: timeAxis,
+        snapInterval: widget.dragSnapInterval,
+        onResizeEnd: (details) async {
+          widget.onResizeEnd?.call(details);
+          return true;
+        },
+        child: tile,
+      );
+    }
+
+    return tile;
   }
 
   String _formatTimeRange(TideEvent event) {

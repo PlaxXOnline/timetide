@@ -126,12 +126,14 @@ class TideController extends ChangeNotifier {
     switch (currentView) {
       case TideView.day:
       case TideView.timelineDay:
+      case TideView.resourceDay:
         return TideDateTimeRange(
           start: DateTime(d.year, d.month, d.day),
           end: DateTime(d.year, d.month, d.day + 1),
         );
       case TideView.week:
       case TideView.timelineWeek:
+      case TideView.resourceWeek:
         final weekStart = d.subtract(Duration(days: d.weekday - 1));
         return TideDateTimeRange(
           start: DateTime(weekStart.year, weekStart.month, weekStart.day),
@@ -177,9 +179,11 @@ class TideController extends ChangeNotifier {
     switch (currentView) {
       case TideView.day:
       case TideView.timelineDay:
+      case TideView.resourceDay:
         return DateTime(d.year, d.month, d.day + direction);
       case TideView.week:
       case TideView.timelineWeek:
+      case TideView.resourceWeek:
         return DateTime(d.year, d.month, d.day + 7 * direction);
       case TideView.workWeek:
       case TideView.timelineWorkWeek:

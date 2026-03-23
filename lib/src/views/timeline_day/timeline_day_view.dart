@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
+import '../../widgets/common/scroll_sync.dart';
 import '../../core/models/event.dart';
 import '../../core/models/time_region.dart';
 import '../../core/models/resource.dart';
@@ -37,6 +39,12 @@ class TideTimelineDayView extends StatefulWidget {
     this.onEmptySlotTap,
     this.resourceHeaderBuilder,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, data, and selection.
@@ -84,6 +92,24 @@ class TideTimelineDayView extends StatefulWidget {
   /// Custom builder for event tiles.
   final Widget Function(BuildContext, TideEvent, TideEventBounds)? eventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   State<TideTimelineDayView> createState() => _TideTimelineDayViewState();
 }
@@ -97,6 +123,9 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
   List<TideEvent> _events = [];
   List<TideTimeRegion> _timeRegions = [];
   bool _isLoading = true;
+
+  /// GlobalKeys for resource rows — used for cross-resource drag hit-testing.
+  final Map<String, GlobalKey> _resourceRowKeys = {};
 
   @override
   void initState() {
@@ -142,6 +171,11 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
       _events = results[1] as List<TideEvent>;
       _timeRegions = results[2] as List<TideTimeRegion>;
       _isLoading = false;
+
+      // Ensure each resource has a GlobalKey for cross-resource drag.
+      for (final r in _resources) {
+        _resourceRowKeys.putIfAbsent(r.id, GlobalKey.new);
+      }
     });
   }
 
@@ -278,6 +312,7 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
             .toList();
 
         return TideResourceRow(
+          key: _resourceRowKeys[resource.id],
           events: resourceEvents,
           startHour: widget.startHour,
           endHour: widget.endHour,
@@ -290,9 +325,45 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
           onEventTap: widget.onEventTap,
           onEmptySlotTap: widget.onEmptySlotTap,
           eventBuilder: widget.eventBuilder,
+          controller: widget.controller,
+          date: widget.controller.displayDate,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd != null
+              ? (details) {
+                  // Resolve cross-resource drop using the global drop position.
+                  final targetResourceId = details.dropPosition != null
+                      ? _resolveResourceAtPosition(details.dropPosition!)
+                      : null;
+                  widget.onDragEnd!(TideDragEndDetails(
+                    event: details.event,
+                    newStart: details.newStart,
+                    newEnd: details.newEnd,
+                    newResourceId: targetResourceId ?? resource.id,
+                    dropPosition: details.dropPosition,
+                  ));
+                }
+              : null,
+          onResizeEnd: widget.onResizeEnd,
         );
       }).toList(),
     );
+  }
+
+  /// Determines which resource row contains the given global position.
+  String? _resolveResourceAtPosition(Offset globalPosition) {
+    for (final entry in _resourceRowKeys.entries) {
+      final renderBox =
+          entry.value.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) continue;
+      final local = renderBox.globalToLocal(globalPosition);
+      if (renderBox.paintBounds.contains(local)) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 }
 
@@ -371,63 +442,29 @@ class _TimelineContent extends StatefulWidget {
 class _TimelineContentState extends State<_TimelineContent> {
   final ScrollController _localHorizontal = ScrollController();
   final ScrollController _localVertical = ScrollController();
-  bool _syncingHorizontal = false;
-  bool _syncingVertical = false;
+  late final TideScrollSync _hSync;
+  late final TideScrollSync _vSync;
 
   @override
   void initState() {
     super.initState();
-    _localHorizontal.addListener(_onLocalHorizontalScroll);
-    _localVertical.addListener(_onLocalVerticalScroll);
-    widget.horizontalController.addListener(_onExternalHorizontalScroll);
-    widget.verticalController.addListener(_onExternalVerticalScroll);
+    _hSync = TideScrollSync(
+      primary: _localHorizontal,
+      secondary: widget.horizontalController,
+    );
+    _vSync = TideScrollSync(
+      primary: _localVertical,
+      secondary: widget.verticalController,
+    );
   }
 
   @override
   void dispose() {
-    _localHorizontal.removeListener(_onLocalHorizontalScroll);
-    _localVertical.removeListener(_onLocalVerticalScroll);
-    widget.horizontalController.removeListener(_onExternalHorizontalScroll);
-    widget.verticalController.removeListener(_onExternalVerticalScroll);
+    _hSync.dispose();
+    _vSync.dispose();
     _localHorizontal.dispose();
     _localVertical.dispose();
     super.dispose();
-  }
-
-  void _onLocalHorizontalScroll() {
-    if (_syncingHorizontal) return;
-    _syncingHorizontal = true;
-    if (widget.horizontalController.hasClients) {
-      widget.horizontalController.jumpTo(_localHorizontal.offset);
-    }
-    _syncingHorizontal = false;
-  }
-
-  void _onExternalHorizontalScroll() {
-    if (_syncingHorizontal) return;
-    _syncingHorizontal = true;
-    if (_localHorizontal.hasClients) {
-      _localHorizontal.jumpTo(widget.horizontalController.offset);
-    }
-    _syncingHorizontal = false;
-  }
-
-  void _onLocalVerticalScroll() {
-    if (_syncingVertical) return;
-    _syncingVertical = true;
-    if (widget.verticalController.hasClients) {
-      widget.verticalController.jumpTo(_localVertical.offset);
-    }
-    _syncingVertical = false;
-  }
-
-  void _onExternalVerticalScroll() {
-    if (_syncingVertical) return;
-    _syncingVertical = true;
-    if (_localVertical.hasClients) {
-      _localVertical.jumpTo(widget.verticalController.offset);
-    }
-    _syncingVertical = false;
   }
 
   @override

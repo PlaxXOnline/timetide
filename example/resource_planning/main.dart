@@ -2,6 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:timetide/src/core/controller.dart';
 import 'package:timetide/src/core/datasource_in_memory.dart';
+import 'package:timetide/src/core/models/drag_details.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/core/models/resource.dart';
 import 'package:timetide/src/core/models/view.dart';
@@ -218,6 +219,7 @@ class _ResourcePlanningScreenState extends State<ResourcePlanningScreen> {
       startHour: 8,
       endHour: 19,
       allowDragAndDrop: true,
+      allowResize: true,
       themeData: const TideThemeData(
         primaryColor: Color(0xFF3F51B5),
         todayHighlightColor: Color(0xFF3F51B5),
@@ -237,6 +239,21 @@ class _ResourcePlanningScreenState extends State<ResourcePlanningScreen> {
       },
       onEmptySlotTap: (dateTime) {
         debugPrint('Empty slot tapped at: $dateTime');
+      },
+      onDragEnd: (TideDragEndDetails details) {
+        _datasource.updateEvent(details.event.copyWith(
+          startTime: details.newStart,
+          endTime: details.newEnd,
+          resourceIds: details.newResourceId != null
+              ? [details.newResourceId!]
+              : details.event.resourceIds,
+        ));
+      },
+      onResizeEnd: (TideResizeEndDetails details) {
+        _datasource.updateEvent(details.event.copyWith(
+          startTime: details.newStart,
+          endTime: details.newEnd,
+        ));
       },
     );
   }

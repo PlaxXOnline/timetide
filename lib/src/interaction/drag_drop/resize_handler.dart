@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import 'snap_engine.dart';
+import 'time_axis.dart';
 
 /// Signature for the callback invoked when a resize ends.
 ///
@@ -11,14 +12,16 @@ import 'snap_engine.dart';
 typedef TideResizeEndCallback = Future<bool> Function(
     TideResizeEndDetails details);
 
-/// Adds resize handles to the top and/or bottom edges of a calendar event.
+/// Adds resize handles to the top and/or bottom edges of a calendar event
+/// (or leading/trailing edges for horizontal timeline views).
 ///
 /// The handles allow the user to drag the start or end time of an event.
 /// Uses [GestureDetector] on each handle — **never** Flutter's built-in
 /// `Draggable`.
 ///
-/// On desktop, the cursor changes to [SystemMouseCursors.resizeRow] when
-/// hovering over a handle.
+/// On desktop, the cursor changes to [SystemMouseCursors.resizeRow] (vertical)
+/// or [SystemMouseCursors.resizeColumn] (horizontal) when hovering over a
+/// handle.
 ///
 /// ```dart
 /// TideResizeHandler(
@@ -40,6 +43,7 @@ class TideResizeHandler extends StatefulWidget {
     super.key,
     required this.event,
     required this.child,
+    this.timeAxis,
     this.resizeDirection = TideResizeDirection.both,
     this.resizeHandleSize = 8.0,
     this.snapInterval,
@@ -54,10 +58,15 @@ class TideResizeHandler extends StatefulWidget {
   /// The child widget to add resize handles to.
   final Widget child;
 
+  /// The time axis used to convert pixel deltas to time deltas.
+  /// When null, the handler reports the event's original times
+  /// (backward-compatible).
+  final TideTimeAxis? timeAxis;
+
   /// Which edges can be resized.
   final TideResizeDirection resizeDirection;
 
-  /// Size (height) of each resize handle in logical pixels.
+  /// Size (height or width) of each resize handle in logical pixels.
   final double resizeHandleSize;
 
   /// Grid interval for snapping. `null` means pixel-precise.
@@ -77,12 +86,17 @@ class TideResizeHandler extends StatefulWidget {
 }
 
 class _TideResizeHandlerState extends State<TideResizeHandler> {
-  /// Accumulated vertical drag delta in logical pixels.
+  /// Accumulated drag delta in logical pixels along the time axis.
   ///
   /// Exposed so the view layer can convert pixels to time.
   double resizeDragDelta = 0.0;
   bool _isResizingStart = false;
   bool _isResizingEnd = false;
+
+  /// Whether the time axis flows horizontally.
+  bool get _isHorizontal =>
+      widget.timeAxis != null &&
+      widget.timeAxis!.direction == Axis.horizontal;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +111,10 @@ class _TideResizeHandlerState extends State<TideResizeHandler> {
         widget.resizeDirection == TideResizeDirection.both ||
             widget.resizeDirection == TideResizeDirection.endOnly;
 
+    final resizeCursor = _isHorizontal
+        ? SystemMouseCursors.resizeColumn
+        : SystemMouseCursors.resizeRow;
+
     return Semantics(
       label: 'Resizable calendar event: ${widget.event.subject}',
       child: Stack(
@@ -104,42 +122,65 @@ class _TideResizeHandlerState extends State<TideResizeHandler> {
           // The event content.
           Positioned.fill(child: widget.child),
 
-          // Top handle (start time).
+          // Start handle (top for vertical, left for horizontal).
           if (canResizeStart)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: widget.resizeHandleSize,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeRow,
-                child: GestureDetector(
-                  onVerticalDragStart: (_) => _onResizeStart(isStart: true),
-                  onVerticalDragUpdate: (d) => _onResizeUpdate(d.delta.dy),
-                  onVerticalDragEnd: (_) => _onResizeEnd(),
-                  child: const SizedBox.expand(),
-                ),
-              ),
-            ),
+            _isHorizontal
+                ? Positioned(
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: widget.resizeHandleSize,
+                    child: _buildHandle(resizeCursor, isStart: true),
+                  )
+                : Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: widget.resizeHandleSize,
+                    child: _buildHandle(resizeCursor, isStart: true),
+                  ),
 
-          // Bottom handle (end time).
+          // End handle (bottom for vertical, right for horizontal).
           if (canResizeEnd)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: widget.resizeHandleSize,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeRow,
-                child: GestureDetector(
-                  onVerticalDragStart: (_) => _onResizeStart(isStart: false),
-                  onVerticalDragUpdate: (d) => _onResizeUpdate(d.delta.dy),
-                  onVerticalDragEnd: (_) => _onResizeEnd(),
-                  child: const SizedBox.expand(),
-                ),
-              ),
-            ),
+            _isHorizontal
+                ? Positioned(
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: widget.resizeHandleSize,
+                    child: _buildHandle(resizeCursor, isStart: false),
+                  )
+                : Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: widget.resizeHandleSize,
+                    child: _buildHandle(resizeCursor, isStart: false),
+                  ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHandle(MouseCursor cursor, {required bool isStart}) {
+    if (_isHorizontal) {
+      return MouseRegion(
+        cursor: cursor,
+        child: GestureDetector(
+          onHorizontalDragStart: (_) => _onResizeStart(isStart: isStart),
+          onHorizontalDragUpdate: (d) => _onResizeUpdate(d.delta.dx),
+          onHorizontalDragEnd: (_) => _onResizeEnd(),
+          child: const SizedBox.expand(),
+        ),
+      );
+    }
+    return MouseRegion(
+      cursor: cursor,
+      child: GestureDetector(
+        onVerticalDragStart: (_) => _onResizeStart(isStart: isStart),
+        onVerticalDragUpdate: (d) => _onResizeUpdate(d.delta.dy),
+        onVerticalDragEnd: (_) => _onResizeEnd(),
+        child: const SizedBox.expand(),
       ),
     );
   }
@@ -154,21 +195,43 @@ class _TideResizeHandlerState extends State<TideResizeHandler> {
     }
   }
 
-  void _onResizeUpdate(double deltaY) {
-    resizeDragDelta += deltaY;
+  void _onResizeUpdate(double delta) {
+    resizeDragDelta += delta;
   }
 
   void _onResizeEnd() {
     if (!_isResizingStart && !_isResizingEnd) return;
 
-    // The actual time delta depends on the view's pixel-to-time ratio.
-    // This handler provides the raw end details for the view layer to
-    // compute the final times. As a baseline, snap the current times.
     var newStart = widget.event.startTime;
     var newEnd = widget.event.endTime;
 
+    if (widget.timeAxis != null) {
+      // Convert pixel delta to time delta.
+      // Use the event's edge as the reference point.
+      if (_isResizingStart) {
+        final startPixel = widget.timeAxis!.timeToPixel(widget.event.startTime);
+        final newStartTime = widget.timeAxis!.pixelToTime(startPixel + resizeDragDelta);
+        newStart = newStartTime;
+      }
+      if (_isResizingEnd) {
+        final endPixel = widget.timeAxis!.timeToPixel(widget.event.endTime);
+        final newEndTime = widget.timeAxis!.pixelToTime(endPixel + resizeDragDelta);
+        newEnd = newEndTime;
+      }
+    }
+
     newStart = TideSnapEngine.snapToGrid(newStart, widget.snapInterval);
     newEnd = TideSnapEngine.snapToGrid(newEnd, widget.snapInterval);
+
+    // Prevent inverted range.
+    if (newEnd.isBefore(newStart) || newEnd.isAtSameMomentAs(newStart)) {
+      final minDuration = widget.snapInterval ?? const Duration(minutes: 15);
+      if (_isResizingStart) {
+        newStart = newEnd.subtract(minDuration);
+      } else {
+        newEnd = newStart.add(minDuration);
+      }
+    }
 
     final details = TideResizeEndDetails(
       event: widget.event,

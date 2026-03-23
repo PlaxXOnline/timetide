@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import '../../core/models/time_region.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
+import '../../interaction/drag_drop/resize_handler.dart';
+import '../../interaction/drag_drop/time_axis.dart';
 import '../../rendering/current_time_painter.dart';
 import '../../rendering/event_layout_engine.dart';
 import '../../rendering/time_region_painter.dart';
@@ -41,6 +45,12 @@ class TideWeekView extends StatefulWidget {
     this.onEmptySlotTap,
     this.eventBuilder,
     this.allDayEventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, selection, and data.
@@ -98,6 +108,24 @@ class TideWeekView extends StatefulWidget {
   final Widget Function(BuildContext context, TideEvent event)?
       allDayEventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   State<TideWeekView> createState() => _TideWeekViewState();
 }
@@ -107,6 +135,20 @@ class _TideWeekViewState extends State<TideWeekView> {
   late final TideCurrentTimeNotifier _timeNotifier;
   List<TideEvent> _events = const [];
   List<TideTimeRegion> _timeRegions = const [];
+
+  /// GlobalKeys for day columns — used for cross-day drag hit-testing.
+  final Map<int, GlobalKey> _dayColumnKeys = {};
+
+  /// Tracks the last known global position during a drag for cross-day
+  /// hit-testing when the drag ends.
+  Offset? _lastDragGlobalPosition;
+
+  // ─── Live snap-to-slot state ───────────────────────────
+  /// The event currently being dragged, or `null`.
+  TideEvent? _draggingEvent;
+
+  /// The snapped proposed start time during an active drag.
+  DateTime? _dragProposedStart;
 
   @override
   void initState() {
@@ -255,10 +297,15 @@ class _TideWeekViewState extends State<TideWeekView> {
                       ),
 
                       // Day columns
-                      for (final date in dates)
-                        Expanded(
-                          child: _buildDayColumn(context, theme, date),
-                        ),
+                      for (var i = 0; i < dates.length; i++) ...[
+                        () {
+                          _dayColumnKeys.putIfAbsent(i, GlobalKey.new);
+                          return Expanded(
+                            key: _dayColumnKeys[i],
+                            child: _buildDayColumn(context, theme, dates[i]),
+                          );
+                        }(),
+                      ],
                     ],
                   ),
                 ),
@@ -360,11 +407,30 @@ class _TideWeekViewState extends State<TideWeekView> {
     final dayEvents = TideDayViewLayout.timedEvents(_eventsForDate(date));
     final dayRegions = _regionsForDate(date);
 
+    final timeAxis = TideTimeAxis.vertical(
+      date: date,
+      startHour: widget.startHour,
+      hourHeight: widget.hourHeight,
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
+
+        // Substitute the dragged event with its proposed position so the
+        // layout engine places it at the snap slot.
+        final displayEvents = dayEvents.map((e) {
+          if (_draggingEvent?.id == e.id && _dragProposedStart != null) {
+            return e.copyWith(
+              startTime: _dragProposedStart!,
+              endTime: _dragProposedStart!.add(e.duration),
+            );
+          }
+          return e;
+        }).toList();
+
         final layoutResults = TideDayViewLayout.layoutEvents(
-          events: dayEvents,
+          events: displayEvents,
           strategy: widget.eventOverlapStrategy,
           startHour: widget.startHour,
           endHour: widget.endHour,
@@ -433,7 +499,7 @@ class _TideWeekViewState extends State<TideWeekView> {
                   top: result.bounds.top,
                   width: result.bounds.width,
                   height: result.bounds.height,
-                  child: _buildEventTile(context, theme, result.event),
+                  child: _buildEventTile(context, theme, result.event, timeAxis, date),
                 ),
 
               // Current time indicator (non-interactive)
@@ -471,33 +537,53 @@ class _TideWeekViewState extends State<TideWeekView> {
         date.day == now.day;
   }
 
+  /// Determines which day column contains the given global position.
+  DateTime? _resolveDayAtPosition(Offset globalPosition) {
+    final dates = _visibleDates;
+    for (var i = 0; i < dates.length; i++) {
+      final key = _dayColumnKeys[i];
+      final renderBox =
+          key?.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) continue;
+      final local = renderBox.globalToLocal(globalPosition);
+      if (renderBox.paintBounds.contains(local)) {
+        return dates[i];
+      }
+    }
+    return null;
+  }
+
   Widget _buildEventTile(
     BuildContext context,
     TideThemeData theme,
     TideEvent event,
+    TideTimeAxis timeAxis,
+    DateTime date,
   ) {
+    final isDragging = _draggingEvent?.id == event.id;
+
+    // Build the visual content — either custom or default.
+    Widget tile;
     if (widget.eventBuilder != null) {
-      return widget.eventBuilder!(context, event);
-    }
+      tile = widget.eventBuilder!(context, event);
+    } else {
+      final color = event.color ?? theme.primaryColor;
+      final isSelected = widget.controller.selectedEvents.contains(event);
 
-    final color = event.color ?? theme.primaryColor;
-    final isSelected = widget.controller.selectedEvents.contains(event);
-
-    return Semantics(
-      label: 'Event: ${event.subject}',
-      button: true,
-      child: GestureDetector(
-        onTap:
-            widget.onEventTap != null ? () => widget.onEventTap!(event) : null,
+      final tileContent = Semantics(
+        label: 'Event: ${event.subject}',
+        button: true,
         child: Container(
           margin: EdgeInsets.only(right: theme.eventSpacing),
           padding: theme.eventPadding,
           decoration: BoxDecoration(
             color: color,
             borderRadius: theme.eventBorderRadius,
-            border: isSelected
+            border: isDragging
                 ? Border.all(color: theme.selectionColor, width: 2)
-                : null,
+                : isSelected
+                    ? Border.all(color: theme.selectionColor, width: 2)
+                    : null,
           ),
           child: Text(
             event.subject,
@@ -506,8 +592,121 @@ class _TideWeekViewState extends State<TideWeekView> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-      ),
-    );
+      );
+
+      if (widget.allowDragAndDrop) {
+        tile = tileContent;
+      } else {
+        tile = GestureDetector(
+          onTap: widget.onEventTap != null
+              ? () => widget.onEventTap!(event)
+              : null,
+          child: tileContent,
+        );
+      }
+    }
+
+    // Apply reduced opacity when this event is being dragged.
+    if (isDragging) {
+      tile = Opacity(opacity: 0.7, child: tile);
+    }
+
+    // ALWAYS wrap with drag handler if enabled (includes resize when
+    // allowResize is true — merged to avoid gesture-arena conflicts).
+    if (widget.allowDragAndDrop) {
+      tile = TideDragHandler(
+        event: event,
+        controller: widget.controller,
+        timeAxis: timeAxis,
+        dragStartBehavior: widget.dragStartBehavior,
+        snapInterval: widget.dragSnapInterval,
+        existingEvents: _events,
+        showGhost: false,
+        allowResize: widget.allowResize,
+        resizeHandleSize: 8.0,
+        onResizeEnd: widget.onResizeEnd != null
+            ? (details) async {
+                widget.onResizeEnd!(details);
+                return true;
+              }
+            : null,
+        onTap: widget.onEventTap != null
+            ? () => widget.onEventTap!(event)
+            : null,
+        onDragStart: (dragEvent, offset) {
+          setState(() {
+            _draggingEvent = dragEvent;
+            _dragProposedStart = dragEvent.startTime;
+          });
+        },
+        onDragUpdate: (details) {
+          _lastDragGlobalPosition = details.globalPosition;
+          setState(() {
+            _draggingEvent = details.event;
+            _dragProposedStart = details.proposedStart;
+          });
+        },
+        onDragEnd: (details) async {
+          // Resolve target day for cross-day drag.
+          final resolvePos =
+              details.dropPosition ?? _lastDragGlobalPosition;
+          DateTime newStart = details.newStart;
+          DateTime newEnd = details.newEnd;
+          if (resolvePos != null) {
+            final targetDay = _resolveDayAtPosition(resolvePos);
+            if (targetDay != null) {
+              final originDay = DateTime(date.year, date.month, date.day);
+              final resolvedDay = DateTime(
+                targetDay.year,
+                targetDay.month,
+                targetDay.day,
+              );
+              if (resolvedDay != originDay) {
+                // Event was dragged to a different day — adjust the date
+                // while keeping the time-of-day from the vertical drag.
+                final timeOfDay = Duration(
+                  hours: details.newStart.hour,
+                  minutes: details.newStart.minute,
+                );
+                newStart = resolvedDay.add(timeOfDay);
+                newEnd = newStart.add(details.event.duration);
+              }
+            }
+          }
+          _lastDragGlobalPosition = null;
+
+          final enrichedDetails = TideDragEndDetails(
+            event: details.event,
+            newStart: newStart,
+            newEnd: newEnd,
+            dropPosition: details.dropPosition,
+          );
+          widget.onDragEnd?.call(enrichedDetails);
+          await Future<void>.delayed(Duration.zero);
+          if (mounted) {
+            setState(() {
+              _draggingEvent = null;
+              _dragProposedStart = null;
+            });
+          }
+          return true;
+        },
+        child: tile,
+      );
+    } else if (widget.allowResize) {
+      tile = TideResizeHandler(
+        event: event,
+        timeAxis: timeAxis,
+        snapInterval: widget.dragSnapInterval,
+        onResizeEnd: (details) async {
+          widget.onResizeEnd?.call(details);
+          return true;
+        },
+        child: tile,
+      );
+    }
+
+    return tile;
   }
 }
 

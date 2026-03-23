@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
+import '../../widgets/common/scroll_sync.dart';
 import '../../core/models/event.dart';
 import '../../core/models/resource.dart';
 import '../../core/models/time_region.dart';
@@ -31,6 +33,12 @@ class TideTimelineWorkWeekView extends StatefulWidget {
     this.onEmptySlotTap,
     this.resourceHeaderBuilder,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, data, and selection.
@@ -75,6 +83,24 @@ class TideTimelineWorkWeekView extends StatefulWidget {
   /// Custom builder for event tiles.
   final Widget Function(BuildContext, TideEvent, TideEventBounds)? eventBuilder;
 
+  /// Whether drag and drop is enabled for events.
+  final bool allowDragAndDrop;
+
+  /// Whether resize handles are shown on events.
+  final bool allowResize;
+
+  /// Grid interval for snapping during drag/resize.
+  final Duration? dragSnapInterval;
+
+  /// When drag gesture begins.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
+
   @override
   State<TideTimelineWorkWeekView> createState() =>
       _TideTimelineWorkWeekViewState();
@@ -88,6 +114,9 @@ class _TideTimelineWorkWeekViewState extends State<TideTimelineWorkWeekView> {
   List<TideEvent> _events = [];
   List<TideTimeRegion> _timeRegions = [];
   bool _isLoading = true;
+
+  /// GlobalKeys for resource rows — used for cross-resource drag hit-testing.
+  final Map<String, GlobalKey> _resourceRowKeys = {};
 
   static const _numberOfDays = 5;
 
@@ -142,6 +171,10 @@ class _TideTimelineWorkWeekViewState extends State<TideTimelineWorkWeekView> {
       _events = results[1] as List<TideEvent>;
       _timeRegions = results[2] as List<TideTimeRegion>;
       _isLoading = false;
+
+      for (final r in _resources) {
+        _resourceRowKeys.putIfAbsent(r.id, GlobalKey.new);
+      }
     });
   }
 
@@ -326,6 +359,7 @@ class _TideTimelineWorkWeekViewState extends State<TideTimelineWorkWeekView> {
         }
 
         return SizedBox(
+          key: _resourceRowKeys[resource.id],
           height: widget.resourceRowHeight,
           child: Row(
             children: days.map((day) {
@@ -363,6 +397,30 @@ class _TideTimelineWorkWeekViewState extends State<TideTimelineWorkWeekView> {
                       showDivider: widget.showResourceDividers,
                       onEventTap: widget.onEventTap,
                       eventBuilder: widget.eventBuilder,
+                      controller: widget.controller,
+                      date: day,
+                      allowDragAndDrop: widget.allowDragAndDrop,
+                      allowResize: widget.allowResize,
+                      dragSnapInterval: widget.dragSnapInterval,
+                      dragStartBehavior: widget.dragStartBehavior,
+                      onDragEnd: widget.onDragEnd != null
+                          ? (details) {
+                              final targetResourceId =
+                                  details.dropPosition != null
+                                      ? _resolveResourceAtPosition(
+                                          details.dropPosition!)
+                                      : null;
+                              widget.onDragEnd!(TideDragEndDetails(
+                                event: details.event,
+                                newStart: details.newStart,
+                                newEnd: details.newEnd,
+                                newResourceId:
+                                    targetResourceId ?? resource.id,
+                                dropPosition: details.dropPosition,
+                              ));
+                            }
+                          : null,
+                      onResizeEnd: widget.onResizeEnd,
                     ),
                     Positioned(
                       right: 0,
@@ -378,6 +436,20 @@ class _TideTimelineWorkWeekViewState extends State<TideTimelineWorkWeekView> {
         );
       }).toList(),
     );
+  }
+
+  /// Determines which resource row contains the given global position.
+  String? _resolveResourceAtPosition(Offset globalPosition) {
+    for (final entry in _resourceRowKeys.entries) {
+      final renderBox =
+          entry.value.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) continue;
+      final local = renderBox.globalToLocal(globalPosition);
+      if (renderBox.paintBounds.contains(local)) {
+        return entry.key;
+      }
+    }
+    return null;
   }
 
   bool _isToday(DateTime d) {
@@ -414,55 +486,23 @@ class _SyncedScrollArea extends StatefulWidget {
 class _SyncedScrollAreaState extends State<_SyncedScrollArea> {
   final ScrollController _lH = ScrollController();
   final ScrollController _lV = ScrollController();
-  bool _sH = false;
-  bool _sV = false;
+  late final TideScrollSync _hSync;
+  late final TideScrollSync _vSync;
 
   @override
   void initState() {
     super.initState();
-    _lH.addListener(_onLH);
-    _lV.addListener(_onLV);
-    widget.hController.addListener(_onEH);
-    widget.vController.addListener(_onEV);
+    _hSync = TideScrollSync(primary: _lH, secondary: widget.hController);
+    _vSync = TideScrollSync(primary: _lV, secondary: widget.vController);
   }
 
   @override
   void dispose() {
-    _lH.removeListener(_onLH);
-    _lV.removeListener(_onLV);
-    widget.hController.removeListener(_onEH);
-    widget.vController.removeListener(_onEV);
+    _hSync.dispose();
+    _vSync.dispose();
     _lH.dispose();
     _lV.dispose();
     super.dispose();
-  }
-
-  void _onLH() {
-    if (_sH) return;
-    _sH = true;
-    if (widget.hController.hasClients) widget.hController.jumpTo(_lH.offset);
-    _sH = false;
-  }
-
-  void _onEH() {
-    if (_sH) return;
-    _sH = true;
-    if (_lH.hasClients) _lH.jumpTo(widget.hController.offset);
-    _sH = false;
-  }
-
-  void _onLV() {
-    if (_sV) return;
-    _sV = true;
-    if (widget.vController.hasClients) widget.vController.jumpTo(_lV.offset);
-    _sV = false;
-  }
-
-  void _onEV() {
-    if (_sV) return;
-    _sV = true;
-    if (_lV.hasClients) _lV.jumpTo(widget.vController.offset);
-    _sV = false;
   }
 
   @override

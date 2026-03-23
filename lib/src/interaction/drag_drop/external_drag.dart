@@ -7,6 +7,70 @@ import '../../core/models/drag_details.dart';
 typedef TideExternalDragEndCallback = void Function(
     TideExternalDragEndDetails details);
 
+/// Provides a communication channel for external drag operations.
+///
+/// Wrap both [TideDragSource] and [TideDragTarget] descendants in a
+/// [TideExternalDragScope] so they can communicate regardless of their
+/// position in the widget tree.
+class TideExternalDragScope extends StatefulWidget {
+  const TideExternalDragScope({super.key, required this.child});
+  final Widget child;
+
+  /// Returns the nearest [TideExternalDragNotifier] or null.
+  static TideExternalDragNotifier? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<_TideExternalDragInherited>()
+        ?.notifier;
+  }
+
+  @override
+  State<TideExternalDragScope> createState() => _TideExternalDragScopeState();
+}
+
+class _TideExternalDragScopeState extends State<TideExternalDragScope> {
+  final TideExternalDragNotifier _notifier = TideExternalDragNotifier();
+
+  @override
+  void dispose() {
+    _notifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _TideExternalDragInherited(
+      notifier: _notifier,
+      child: widget.child,
+    );
+  }
+}
+
+/// Notifier carrying the latest external drag drop event.
+class TideExternalDragNotifier extends ChangeNotifier {
+  TideExternalDragData? _data;
+  Offset? _position;
+
+  TideExternalDragData? get data => _data;
+  Offset? get position => _position;
+
+  void drop(TideExternalDragData data, Offset position) {
+    _data = data;
+    _position = position;
+    notifyListeners();
+    // Clear after notification cycle.
+    _data = null;
+    _position = null;
+  }
+}
+
+class _TideExternalDragInherited
+    extends InheritedNotifier<TideExternalDragNotifier> {
+  const _TideExternalDragInherited({
+    required super.notifier,
+    required super.child,
+  });
+}
+
 /// Wraps a child widget to make it draggable onto a [TideDragTarget].
 ///
 /// Carries a [TideExternalDragData] payload that the target receives on drop.
@@ -93,11 +157,9 @@ class _TideDragSourceState extends State<TideDragSource> {
     if (_isDragging) {
       _isDragging = false;
       _removeFeedback();
-      // The actual drop handling is done by TideDragTarget via
-      // _TideDragTargetState — it listens for the active source data
-      // through the inherited notification mechanism.
-      _TideExternalDragNotification(data: widget.data, position: event.position)
-          .dispatch(context);
+      // Use shared notifier instead of Notification.dispatch.
+      final scope = TideExternalDragScope.of(context);
+      scope?.drop(widget.data, event.position);
     }
   }
 
@@ -153,7 +215,7 @@ class _TideDragSourceState extends State<TideDragSource> {
 ///   child: TimeSlotWidget(),
 /// )
 /// ```
-class TideDragTarget extends StatelessWidget {
+class TideDragTarget extends StatefulWidget {
   /// Creates a [TideDragTarget].
   const TideDragTarget({
     super.key,
@@ -176,30 +238,49 @@ class TideDragTarget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return NotificationListener<_TideExternalDragNotification>(
-      onNotification: (notification) {
-        onExternalDragEnd?.call(TideExternalDragEndDetails(
-          data: notification.data,
-          dropTime: dropTime,
-          dropResourceId: dropResourceId,
-        ));
-        return true;
-      },
-      child: child,
-    );
-  }
+  State<TideDragTarget> createState() => _TideDragTargetState();
 }
 
-/// Internal notification dispatched by [TideDragSource] on pointer up.
-class _TideExternalDragNotification extends Notification {
-  const _TideExternalDragNotification({
-    required this.data,
-    required this.position,
-  });
+class _TideDragTargetState extends State<TideDragTarget> {
+  TideExternalDragNotifier? _notifier;
 
-  final TideExternalDragData data;
-  final Offset position;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newNotifier = TideExternalDragScope.of(context);
+    if (newNotifier != _notifier) {
+      _notifier?.removeListener(_onDrop);
+      _notifier = newNotifier;
+      _notifier?.addListener(_onDrop);
+    }
+  }
+
+  @override
+  void dispose() {
+    _notifier?.removeListener(_onDrop);
+    super.dispose();
+  }
+
+  void _onDrop() {
+    final data = _notifier?.data;
+    final position = _notifier?.position;
+    if (data == null || position == null) return;
+
+    // Hit test: only handle if the drop position is within this target.
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final localPos = renderBox.globalToLocal(position);
+    if (!renderBox.paintBounds.contains(localPos)) return;
+
+    widget.onExternalDragEnd?.call(TideExternalDragEndDetails(
+      data: data,
+      dropTime: widget.dropTime,
+      dropResourceId: widget.dropResourceId,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Default feedback widget for external drags.
