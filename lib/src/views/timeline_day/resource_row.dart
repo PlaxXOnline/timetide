@@ -10,6 +10,7 @@ import '../../interaction/drag_drop/time_axis.dart';
 import '../../rendering/event_layout_engine.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
+import '../../widgets/event_content.dart';
 
 /// Renders a single resource row in a timeline view.
 ///
@@ -248,14 +249,11 @@ class _TideResourceRowState extends State<TideResourceRow> {
                 ? Border.all(color: theme.selectionColor, width: 2)
                 : null,
           ),
-          child: Padding(
+          child: TideEventContent(
+            subject: event.subject,
+            titleStyle: theme.eventTitleStyle,
             padding: theme.eventPadding,
-            child: Text(
-              event.subject,
-              style: theme.eventTitleStyle,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+            availableHeight: widget.rowHeight - 4,
           ),
         ),
       );

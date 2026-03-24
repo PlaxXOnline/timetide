@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -15,6 +16,7 @@ import '../../rendering/event_layout_engine.dart';
 import '../../rendering/time_region_painter.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
+import '../../widgets/event_content.dart';
 import '../../widgets/resource_header/resource_header.dart';
 import '../day/day_view_layout.dart';
 import '../day/time_slot_widget.dart';
@@ -492,7 +494,7 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
         final availableWidth = constraints.maxWidth;
 
         // Substitute the dragged event with its proposed position so the
-        // layout engine places it at the snap slot.
+        // layout engine places it at the snap slot (side-by-side overlap).
         final displayEvents = widget.events.map((e) {
           if (_draggingEvent?.id == e.id && _dragProposedStart != null) {
             return e.copyWith(
@@ -548,14 +550,15 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
                     ),
                   ),
 
-                // Events.
+                // Events
                 for (final result in layoutResults)
                   Positioned(
+                    key: ValueKey(result.event.id),
                     left: result.bounds.left,
                     top: result.bounds.top,
                     width: result.bounds.width,
-                    height: result.bounds.height,
-                    child: _buildEventTile(context, theme, result.event),
+                    height: math.max(result.bounds.height, theme.eventMinHeight),
+                    child: _buildEventTile(context, theme, result.event, math.max(result.bounds.height, theme.eventMinHeight)),
                   ),
 
                 // Current time indicator.
@@ -619,6 +622,7 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
     BuildContext context,
     TideThemeData theme,
     TideEvent event,
+    double tileHeight,
   ) {
     final isDragging = _draggingEvent?.id == event.id;
 
@@ -645,22 +649,13 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
                     ? Border.all(color: theme.selectionColor, width: 2)
                     : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                event.subject,
-                style: theme.eventTitleStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                _formatTimeRange(event),
-                style: theme.eventTimeStyle,
-                maxLines: 1,
-              ),
-            ],
+          child: TideEventContent(
+            subject: event.subject,
+            timeRange: _formatTimeRange(event),
+            titleStyle: theme.eventTitleStyle,
+            timeStyle: theme.eventTimeStyle,
+            padding: EdgeInsets.zero,
+            availableHeight: tileHeight - theme.eventPadding.vertical,
           ),
         ),
       );

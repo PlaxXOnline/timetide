@@ -214,6 +214,9 @@ class _TideDragHandlerState extends State<TideDragHandler> {
   /// The current gesture mode — move or resize.
   _DragMode _dragMode = _DragMode.none;
 
+  /// The current mouse cursor shown over the widget.
+  MouseCursor _currentCursor = SystemMouseCursors.basic;
+
   /// Accumulated resize delta in logical pixels along the time axis.
   double _resizeDragDelta = 0.0;
 
@@ -271,10 +274,11 @@ class _TideDragHandlerState extends State<TideDragHandler> {
       child: child,
     );
 
+    Widget result;
     if (useLongPress) {
       // Use RawGestureDetector with a custom long-press duration so we can
       // make the activation faster than Flutter's default 500 ms.
-      return RawGestureDetector(
+      result = RawGestureDetector(
         gestures: <Type, GestureRecognizerFactory>{
           LongPressGestureRecognizer:
               GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
@@ -298,15 +302,33 @@ class _TideDragHandlerState extends State<TideDragHandler> {
         },
         child: child,
       );
+    } else {
+      result = GestureDetector(
+        onTap: widget.onTap,
+        onPanStart: _onPanStart,
+        onPanUpdate: _onPanUpdate,
+        onPanEnd: _onPanEnd,
+        child: child,
+      );
     }
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      onPanStart: _onPanStart,
-      onPanUpdate: _onPanUpdate,
-      onPanEnd: _onPanEnd,
-      child: child,
-    );
+    // Add cursor feedback for resize handles on desktop/pointer devices.
+    if (widget.allowResize && widget.timeAxis != null) {
+      return MouseRegion(
+        cursor: _currentCursor,
+        onHover: (event) => _updateCursorForPosition(event.localPosition),
+        onExit: (_) {
+          if (_currentCursor != SystemMouseCursors.basic) {
+            setState(() {
+              _currentCursor = SystemMouseCursors.basic;
+            });
+          }
+        },
+        child: result,
+      );
+    }
+
+    return result;
   }
 
   // ─── Pointer Handling ───────────────────────────────────
@@ -322,6 +344,49 @@ class _TideDragHandlerState extends State<TideDragHandler> {
                 .contains(LogicalKeyboardKey.metaLeft) ||
             HardwareKeyboard.instance.logicalKeysPressed
                 .contains(LogicalKeyboardKey.metaRight));
+  }
+
+  // ─── Cursor Feedback ────────────────────────────────────
+
+  /// Updates [_currentCursor] based on the hover position relative to the
+  /// resize handle zones. No-op during active drag to avoid interfering.
+  void _updateCursorForPosition(Offset localPosition) {
+    if (!widget.allowResize || widget.timeAxis == null || _isDragging) {
+      return;
+    }
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final size = renderBox.size;
+    final isVertical = widget.timeAxis!.direction == Axis.vertical;
+    final pos = isVertical ? localPosition.dy : localPosition.dx;
+    final length = isVertical ? size.height : size.width;
+
+    final canResizeStart =
+        widget.resizeDirection == TideResizeDirection.both ||
+            widget.resizeDirection == TideResizeDirection.startOnly;
+    final canResizeEnd =
+        widget.resizeDirection == TideResizeDirection.both ||
+            widget.resizeDirection == TideResizeDirection.endOnly;
+
+    MouseCursor newCursor = SystemMouseCursors.basic;
+
+    if (canResizeStart && pos <= widget.resizeHandleSize) {
+      newCursor = isVertical
+          ? SystemMouseCursors.resizeRow
+          : SystemMouseCursors.resizeColumn;
+    } else if (canResizeEnd && pos >= length - widget.resizeHandleSize) {
+      newCursor = isVertical
+          ? SystemMouseCursors.resizeRow
+          : SystemMouseCursors.resizeColumn;
+    }
+
+    if (newCursor != _currentCursor) {
+      setState(() {
+        _currentCursor = newCursor;
+      });
+    }
   }
 
   // ─── Long Press Gesture (mobile / longPress mode) ──────

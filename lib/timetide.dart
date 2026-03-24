@@ -113,6 +113,9 @@ export 'src/widgets/common/tide_scrollbar.dart';
 export 'src/widgets/common/adaptive_layout.dart';
 export 'src/widgets/common/scroll_sync.dart';
 
+// Widgets — Event Content
+export 'src/widgets/event_content.dart';
+
 // Widgets — Context Menu
 export 'src/widgets/context_menu/tide_context_menu.dart';
 
