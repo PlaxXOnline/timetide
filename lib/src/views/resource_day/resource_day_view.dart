@@ -485,6 +485,9 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
   /// The snapped proposed start time during an active drag.
   DateTime? _dragProposedStart;
 
+  /// The proposed end time during an active resize drag.
+  DateTime? _dragProposedEnd;
+
   @override
   Widget build(BuildContext context) {
     final theme = TideTheme.of(context);
@@ -499,7 +502,7 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
           if (_draggingEvent?.id == e.id && _dragProposedStart != null) {
             return e.copyWith(
               startTime: _dragProposedStart!,
-              endTime: _dragProposedStart!.add(e.duration),
+              endTime: _dragProposedEnd ?? _dragProposedStart!.add(e.duration),
             );
           }
           return e;
@@ -709,6 +712,7 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
           setState(() {
             _draggingEvent = details.event;
             _dragProposedStart = details.proposedStart;
+            _dragProposedEnd = details.proposedEnd;
           });
           _lastDragGlobalPosition = details.globalPosition;
         },
@@ -734,6 +738,7 @@ class _ResourceDayColumnState extends State<_ResourceDayColumn> {
             setState(() {
               _draggingEvent = null;
               _dragProposedStart = null;
+              _dragProposedEnd = null;
             });
           }
           _lastDragGlobalPosition = null;

@@ -95,6 +95,7 @@ class TideDragUpdateDetails {
   const TideDragUpdateDetails({
     required this.event,
     required this.proposedStart,
+    this.proposedEnd,
     this.proposedResourceId,
     this.conflicts = const [],
     this.globalPosition,
@@ -105,6 +106,12 @@ class TideDragUpdateDetails {
 
   /// The proposed new start time at the current drag position.
   final DateTime proposedStart;
+
+  /// The proposed new end time at the current drag position.
+  ///
+  /// Non-null during resize operations. During move operations this is
+  /// typically `null` because the duration stays constant.
+  final DateTime? proposedEnd;
 
   /// The resource currently under the drag pointer, if any.
   final String? proposedResourceId;

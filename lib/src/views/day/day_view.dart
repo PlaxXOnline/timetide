@@ -142,6 +142,9 @@ class _TideDayViewState extends State<TideDayView> {
   /// The snapped proposed start time during an active drag.
   DateTime? _dragProposedStart;
 
+  /// The proposed end time during an active resize drag.
+  DateTime? _dragProposedEnd;
+
   @override
   void initState() {
     super.initState();
@@ -369,7 +372,7 @@ class _TideDayViewState extends State<TideDayView> {
           if (_draggingEvent?.id == e.id && _dragProposedStart != null) {
             return e.copyWith(
               startTime: _dragProposedStart!,
-              endTime: _dragProposedStart!.add(e.duration),
+              endTime: _dragProposedEnd ?? _dragProposedStart!.add(e.duration),
             );
           }
           return e;
@@ -573,6 +576,7 @@ class _TideDayViewState extends State<TideDayView> {
           setState(() {
             _draggingEvent = details.event;
             _dragProposedStart = details.proposedStart;
+            _dragProposedEnd = details.proposedEnd;
           });
         },
         onDragEnd: (details) async {
@@ -585,6 +589,7 @@ class _TideDayViewState extends State<TideDayView> {
             setState(() {
               _draggingEvent = null;
               _dragProposedStart = null;
+              _dragProposedEnd = null;
             });
           }
           return true;

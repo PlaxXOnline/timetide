@@ -447,6 +447,9 @@ class _TideDragHandlerState extends State<TideDragHandler> {
       if (widget.showGhost) {
         _insertGhost();
       }
+    } else {
+      // Resize — notify view so it can track the resizing event.
+      widget.onDragStart?.call(widget.event, globalPosition);
     }
   }
 
@@ -497,6 +500,7 @@ class _TideDragHandlerState extends State<TideDragHandler> {
             ? delta.dy
             : delta.dx;
       }
+      _updateResizeFeedback();
     }
 
     _previousDragPosition = globalPosition;
@@ -550,6 +554,48 @@ class _TideDragHandlerState extends State<TideDragHandler> {
       proposedStart: proposedStart,
       conflicts: conflicts.map((c) => c.eventB).toList(),
       globalPosition: globalPosition,
+    ));
+  }
+
+  void _updateResizeFeedback() {
+    if (widget.timeAxis == null) return;
+
+    final originalStart = _originalStartTime ?? widget.event.startTime;
+    final originalEnd = _originalEndTime ?? widget.event.endTime;
+    var proposedStart = originalStart;
+    var proposedEnd = originalEnd;
+
+    if (_dragMode == _DragMode.resizeStart) {
+      final startPixel = widget.timeAxis!.timeToPixel(originalStart);
+      proposedStart =
+          widget.timeAxis!.pixelToTime(startPixel + _resizeDragDelta);
+      proposedStart =
+          TideSnapEngine.snapToGrid(proposedStart, widget.snapInterval);
+    } else if (_dragMode == _DragMode.resizeEnd) {
+      final endPixel = widget.timeAxis!.timeToPixel(originalEnd);
+      proposedEnd =
+          widget.timeAxis!.pixelToTime(endPixel + _resizeDragDelta);
+      proposedEnd =
+          TideSnapEngine.snapToGrid(proposedEnd, widget.snapInterval);
+    }
+
+    // Prevent inverted range.
+    if (proposedEnd.isBefore(proposedStart) ||
+        proposedEnd.isAtSameMomentAs(proposedStart)) {
+      final minDuration =
+          widget.snapInterval ?? const Duration(minutes: 15);
+      if (_dragMode == _DragMode.resizeStart) {
+        proposedStart = proposedEnd.subtract(minDuration);
+      } else {
+        proposedEnd = proposedStart.add(minDuration);
+      }
+    }
+
+    widget.onDragUpdate?.call(TideDragUpdateDetails(
+      event: widget.event,
+      proposedStart: proposedStart,
+      proposedEnd: proposedEnd,
+      globalPosition: _currentDragOffset,
     ));
   }
 
