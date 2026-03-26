@@ -158,6 +158,7 @@ class _TideResourceWeekViewState extends State<TideResourceWeekView> {
   List<TideEvent> _events = [];
   List<TideTimeRegion> _timeRegions = [];
   bool _isLoading = true;
+  int _loadGeneration = 0;
 
   /// GlobalKeys for resource columns — used for cross-resource drag.
   final Map<String, GlobalKey> _columnKeys = {};
@@ -165,6 +166,14 @@ class _TideResourceWeekViewState extends State<TideResourceWeekView> {
   /// GlobalKeys for day sub-columns — used for cross-day drag.
   /// Key format: "resourceId_dayIndex".
   final Map<String, GlobalKey> _dayColumnKeys = {};
+
+  // Cross-resource drag state — managed at parent level so all columns
+  // can show/hide the dragged event as it moves between resources.
+  TideEvent? _crossDragEvent;
+  DateTime? _crossDragStart;
+  DateTime? _crossDragEnd;
+  String? _crossDragTargetResourceId;
+  String? _crossDragSourceResourceId;
 
   List<DateTime> get _days {
     final range = widget.controller.visibleDateRange;
@@ -210,13 +219,14 @@ class _TideResourceWeekViewState extends State<TideResourceWeekView> {
   void _onControllerChanged() => _loadData();
 
   Future<void> _loadData() async {
+    final gen = ++_loadGeneration;
     final range = widget.controller.visibleDateRange;
     final results = await Future.wait([
       widget.controller.datasource.getResources(),
       widget.controller.datasource.getEvents(range.start, range.end),
       widget.controller.datasource.getTimeRegions(range.start, range.end),
     ]);
-    if (!mounted) return;
+    if (!mounted || gen != _loadGeneration) return;
     setState(() {
       _resources = results[0] as List<TideResource>;
       _events = results[1] as List<TideEvent>;
@@ -426,12 +436,19 @@ class _TideResourceWeekViewState extends State<TideResourceWeekView> {
                     dragStartBehavior: widget.dragStartBehavior,
                     onEventTap: widget.onEventTap,
                     onEmptySlotTap: widget.onEmptySlotTap,
-                    onDragEnd: widget.onDragEnd,
+                    onDragEnd: _handleColumnDragEnd,
                     onResizeEnd: widget.onResizeEnd,
                     eventBuilder: widget.eventBuilder,
                     resolveResourceAtPosition: _resolveResourceAtPosition,
                     resolveDayAtPosition: _resolveDayAtPosition,
                     showDivider: true,
+                    crossDragEvent: _crossDragEvent,
+                    crossDragStart: _crossDragStart,
+                    crossDragEnd: _crossDragEnd,
+                    crossDragTargetResourceId: _crossDragTargetResourceId,
+                    crossDragSourceResourceId: _crossDragSourceResourceId,
+                    onCrossDragUpdate: _onCrossDragUpdate,
+                    onCrossDragEnd: _onCrossDragEnd,
                   ),
                 );
               }).toList(),
@@ -440,6 +457,88 @@ class _TideResourceWeekViewState extends State<TideResourceWeekView> {
         );
       }).toList(),
     );
+  }
+
+  void _onCrossDragUpdate(
+    TideEvent event,
+    DateTime proposedStart,
+    DateTime? proposedEnd,
+    String sourceResourceId,
+    Offset globalPosition,
+  ) {
+    final targetResourceId = _resolveResourceAtPosition(globalPosition);
+    final isCrossResource =
+        targetResourceId != null && targetResourceId != sourceResourceId;
+
+    if (!isCrossResource && _crossDragEvent == null) {
+      return; // Within source column, no cross-drag active — skip.
+    }
+
+    if (!isCrossResource && _crossDragEvent != null) {
+      // Pointer moved back to source column — clear cross-drag.
+      setState(() {
+        _crossDragEvent = null;
+        _crossDragStart = null;
+        _crossDragEnd = null;
+        _crossDragTargetResourceId = null;
+        _crossDragSourceResourceId = null;
+      });
+      return;
+    }
+
+    // Cross-resource drag — only update if something changed.
+    if (targetResourceId != _crossDragTargetResourceId ||
+        proposedStart != _crossDragStart ||
+        proposedEnd != _crossDragEnd) {
+      setState(() {
+        _crossDragEvent = event;
+        _crossDragStart = proposedStart;
+        _crossDragEnd = proposedEnd;
+        _crossDragTargetResourceId = targetResourceId;
+        _crossDragSourceResourceId = sourceResourceId;
+      });
+    }
+  }
+
+  /// Optimistically updates [_events] when an event is dropped on a different
+  /// resource so that any subsequent parent rebuild (e.g. from a cross-drag
+  /// setState) uses correct data instead of the stale list from [_loadData].
+  void _handleColumnDragEnd(TideDragEndDetails details) {
+    if (details.newResourceId != null && details.sourceResourceId != null) {
+      final idx = _events.indexWhere((e) => e.id == details.event.id);
+      if (idx >= 0) {
+        final event = _events[idx];
+        if (event.resourceIds != null) {
+          final newIds = event.resourceIds!
+              .map((id) =>
+                  id == details.sourceResourceId ? details.newResourceId! : id)
+              .toList();
+          ++_loadGeneration; // Invalidate any pending _loadData
+          setState(() {
+            _events = List<TideEvent>.from(_events);
+            _events[idx] = event.copyWith(
+              resourceIds: newIds,
+              startTime: details.newStart,
+              endTime: details.newEnd,
+            );
+          });
+        }
+      }
+    }
+    // Forward to the app's callback.
+    widget.onDragEnd?.call(details);
+  }
+
+  void _onCrossDragEnd() {
+    if (_crossDragEvent != null) {
+      setState(() {
+        _crossDragEvent = null;
+        _crossDragStart = null;
+        _crossDragEnd = null;
+        _crossDragTargetResourceId = null;
+        _crossDragSourceResourceId = null;
+      });
+    }
   }
 
   String? _resolveResourceAtPosition(Offset globalPosition) {
@@ -519,6 +618,13 @@ class _ResourceDaySubColumn extends StatefulWidget {
     required this.resolveResourceAtPosition,
     required this.resolveDayAtPosition,
     required this.showDivider,
+    this.crossDragEvent,
+    this.crossDragStart,
+    this.crossDragEnd,
+    this.crossDragTargetResourceId,
+    this.crossDragSourceResourceId,
+    this.onCrossDragUpdate,
+    this.onCrossDragEnd,
   });
 
   final TideResource resource;
@@ -549,6 +655,13 @@ class _ResourceDaySubColumn extends StatefulWidget {
   final String? Function(Offset globalPosition) resolveResourceAtPosition;
   final DateTime? Function(Offset globalPosition) resolveDayAtPosition;
   final bool showDivider;
+  final TideEvent? crossDragEvent;
+  final DateTime? crossDragStart;
+  final DateTime? crossDragEnd;
+  final String? crossDragTargetResourceId;
+  final String? crossDragSourceResourceId;
+  final void Function(TideEvent event, DateTime proposedStart, DateTime? proposedEnd, String sourceResourceId, Offset globalPosition)? onCrossDragUpdate;
+  final VoidCallback? onCrossDragEnd;
 
   @override
   State<_ResourceDaySubColumn> createState() => _ResourceDaySubColumnState();
@@ -586,6 +699,28 @@ class _ResourceDaySubColumnState extends State<_ResourceDaySubColumn> {
           }
           return e;
         }).toList();
+
+        // Cross-resource drag: show event in target column.
+        if (widget.crossDragEvent != null &&
+            widget.crossDragTargetResourceId == widget.resource.id &&
+            widget.crossDragSourceResourceId != widget.resource.id &&
+            widget.crossDragStart != null) {
+          displayEvents.add(widget.crossDragEvent!.copyWith(
+            startTime: widget.crossDragStart!,
+            endTime: widget.crossDragEnd ??
+                widget.crossDragStart!.add(widget.crossDragEvent!.duration),
+          ));
+        }
+
+        // Cross-resource drag: track which event to hide (but keep in tree
+        // so its GestureRecognizer stays alive for onPanEnd).
+        final String? hiddenCrossDragEventId =
+            (widget.crossDragEvent != null &&
+                    widget.crossDragSourceResourceId == widget.resource.id &&
+                    widget.crossDragTargetResourceId != null &&
+                    widget.crossDragTargetResourceId != widget.resource.id)
+                ? widget.crossDragEvent!.id
+                : null;
 
         final layoutResults = TideDayViewLayout.layoutEvents(
           events: displayEvents,
@@ -639,7 +774,10 @@ class _ResourceDaySubColumnState extends State<_ResourceDaySubColumn> {
                     top: result.bounds.top,
                     width: result.bounds.width,
                     height: math.max(result.bounds.height, theme.eventMinHeight),
-                    child: _buildEventTile(context, theme, result.event, math.max(result.bounds.height, theme.eventMinHeight)),
+                    child: Opacity(
+                      opacity: result.event.id == hiddenCrossDragEventId ? 0.0 : 1.0,
+                      child: _buildEventTile(context, theme, result.event, math.max(result.bounds.height, theme.eventMinHeight)),
+                    ),
                   ),
 
                 if (widget.showCurrentTimeIndicator)
@@ -787,6 +925,16 @@ class _ResourceDaySubColumnState extends State<_ResourceDaySubColumn> {
             _dragProposedEnd = details.proposedEnd;
           });
           _lastDragGlobalPosition = details.globalPosition;
+          // Notify parent for cross-resource feedback.
+          if (details.globalPosition != null) {
+            widget.onCrossDragUpdate?.call(
+              details.event,
+              details.proposedStart,
+              details.proposedEnd,
+              widget.resource.id,
+              details.globalPosition!,
+            );
+          }
         },
         onDragEnd: (details) async {
           final resolvePos = details.dropPosition ?? _lastDragGlobalPosition;
@@ -834,6 +982,7 @@ class _ResourceDaySubColumnState extends State<_ResourceDaySubColumn> {
           // Call parent FIRST so the new position propagates before
           // we clear the drag visual state. This prevents snap-back flicker.
           widget.onDragEnd?.call(enrichedDetails);
+          widget.onCrossDragEnd?.call();
           await Future<void>.delayed(Duration.zero);
           if (mounted) {
             setState(() {

@@ -41,6 +41,13 @@ class TideResourceRow extends StatefulWidget {
     this.dragStartBehavior = TideDragStartBehavior.adaptive,
     this.onDragEnd,
     this.onResizeEnd,
+    this.crossDragEvent,
+    this.crossDragStart,
+    this.crossDragEnd,
+    this.crossDragTargetResourceId,
+    this.crossDragSourceResourceId,
+    this.onCrossDragUpdate,
+    this.onCrossDragEnd,
   });
 
   /// Events to display in this row.
@@ -109,6 +116,33 @@ class TideResourceRow extends StatefulWidget {
   /// Called when a resize operation completes.
   final void Function(TideResizeEndDetails details)? onResizeEnd;
 
+  /// The event currently being dragged across resources, if any.
+  final TideEvent? crossDragEvent;
+
+  /// The proposed start time for the cross-drag preview.
+  final DateTime? crossDragStart;
+
+  /// The proposed end time for the cross-drag preview.
+  final DateTime? crossDragEnd;
+
+  /// The resource ID that the cross-drag pointer is currently over.
+  final String? crossDragTargetResourceId;
+
+  /// The resource ID that the cross-drag originated from.
+  final String? crossDragSourceResourceId;
+
+  /// Called during a drag to notify the parent of cross-resource movement.
+  final void Function(
+    TideEvent event,
+    DateTime proposedStart,
+    DateTime? proposedEnd,
+    String sourceResourceId,
+    Offset globalPosition,
+  )? onCrossDragUpdate;
+
+  /// Called when a cross-resource drag ends.
+  final VoidCallback? onCrossDragEnd;
+
   @override
   State<TideResourceRow> createState() => _TideResourceRowState();
 }
@@ -129,7 +163,39 @@ class _TideResourceRowState extends State<TideResourceRow> {
 
     // Layout events horizontally — we repurpose the vertical layout engine
     // by swapping axes: width becomes height, height becomes width.
-    final timedEvents = widget.events.where((e) => !e.isAllDay).toList();
+    List<TideEvent> displayEventList =
+        widget.events.where((e) => !e.isAllDay).toList();
+
+    // Cross-resource drag: add preview event in target row.
+    if (widget.crossDragEvent != null &&
+        widget.crossDragTargetResourceId == widget.resourceId &&
+        widget.crossDragSourceResourceId != widget.resourceId &&
+        widget.crossDragStart != null) {
+      // Only add if the event's proposed time falls on this row's date.
+      final rowDate = widget.date;
+      final proposedDate = widget.crossDragStart!;
+      if (rowDate == null ||
+          (proposedDate.year == rowDate.year &&
+              proposedDate.month == rowDate.month &&
+              proposedDate.day == rowDate.day)) {
+        displayEventList = List.of(displayEventList);
+        displayEventList.add(widget.crossDragEvent!.copyWith(
+          startTime: widget.crossDragStart!,
+          endTime: widget.crossDragEnd ??
+              widget.crossDragStart!.add(widget.crossDragEvent!.duration),
+        ));
+      }
+    }
+
+    // Cross-resource drag: track which event to hide (but keep in tree
+    // so its GestureRecognizer stays alive for onPanEnd).
+    final String? hiddenCrossDragEventId =
+        (widget.crossDragEvent != null &&
+                widget.crossDragSourceResourceId == widget.resourceId &&
+                widget.crossDragTargetResourceId != null &&
+                widget.crossDragTargetResourceId != widget.resourceId)
+            ? widget.crossDragEvent!.id
+            : null;
 
     return SizedBox(
       width: totalWidth,
@@ -152,7 +218,7 @@ class _TideResourceRowState extends State<TideResourceRow> {
             ),
 
           // Events positioned horizontally.
-          for (final event in timedEvents)
+          for (final event in displayEventList)
             _buildEventTile(
               context,
               theme,
@@ -165,6 +231,7 @@ class _TideResourceRowState extends State<TideResourceRow> {
                       hourWidth: widget.hourWidth,
                     )
                   : null,
+              hidden: event.id == hiddenCrossDragEventId,
             ),
 
           // Bottom divider.
@@ -208,8 +275,9 @@ class _TideResourceRowState extends State<TideResourceRow> {
     TideThemeData theme,
     TideEvent event,
     double totalWidth,
-    TideTimeAxis? timeAxis,
-  ) {
+    TideTimeAxis? timeAxis, {
+    bool hidden = false,
+  }) {
     final isDragging = _draggingEvent?.id == event.id;
 
     // Use proposed position during drag for live snap feedback.
@@ -305,9 +373,22 @@ class _TideResourceRowState extends State<TideResourceRow> {
             _draggingEvent = details.event;
             _dragProposedStart = details.proposedStart;
           });
+          // Notify parent for cross-resource feedback.
+          if (details.globalPosition != null) {
+            widget.onCrossDragUpdate?.call(
+              details.event,
+              details.proposedStart,
+              details.proposedEnd,
+              widget.resourceId ?? '',
+              details.globalPosition!,
+            );
+          }
         },
         onDragEnd: (details) async {
+          // onDragEnd FIRST so _handleRowDragEnd updates _events
+          // before onCrossDragEnd triggers a parent rebuild.
           widget.onDragEnd?.call(details);
+          widget.onCrossDragEnd?.call();
           await Future<void>.delayed(Duration.zero);
           if (mounted) {
             setState(() {
@@ -337,7 +418,9 @@ class _TideResourceRowState extends State<TideResourceRow> {
       top: 2,
       width: width.clamp(theme.eventMinHeight, double.infinity),
       height: widget.rowHeight - 4,
-      child: tile,
+      // Always wrap in Opacity so the tree structure stays stable.
+      // Changing only the value (not the tree) preserves GestureRecognizer state.
+      child: Opacity(opacity: hidden ? 0.0 : 1.0, child: tile),
     );
   }
 }

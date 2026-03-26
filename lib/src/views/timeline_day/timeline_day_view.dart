@@ -123,9 +123,18 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
   List<TideEvent> _events = [];
   List<TideTimeRegion> _timeRegions = [];
   bool _isLoading = true;
+  int _loadGeneration = 0;
 
   /// GlobalKeys for resource rows — used for cross-resource drag hit-testing.
   final Map<String, GlobalKey> _resourceRowKeys = {};
+
+  // Cross-resource drag state — managed at parent level so all rows
+  // can show/hide the dragged event as it moves between resources.
+  TideEvent? _crossDragEvent;
+  DateTime? _crossDragStart;
+  DateTime? _crossDragEnd;
+  String? _crossDragTargetResourceId;
+  String? _crossDragSourceResourceId;
 
   @override
   void initState() {
@@ -159,13 +168,14 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
   }
 
   Future<void> _loadData() async {
+    final gen = ++_loadGeneration;
     final range = widget.controller.visibleDateRange;
     final results = await Future.wait([
       widget.controller.datasource.getResources(),
       widget.controller.datasource.getEvents(range.start, range.end),
       widget.controller.datasource.getTimeRegions(range.start, range.end),
     ]);
-    if (!mounted) return;
+    if (!mounted || gen != _loadGeneration) return;
     setState(() {
       _resources = results[0] as List<TideResource>;
       _events = results[1] as List<TideEvent>;
@@ -332,26 +342,112 @@ class _TideTimelineDayViewState extends State<TideTimelineDayView> {
           allowResize: widget.allowResize,
           dragSnapInterval: widget.dragSnapInterval,
           dragStartBehavior: widget.dragStartBehavior,
-          onDragEnd: widget.onDragEnd != null
-              ? (details) {
-                  // Resolve cross-resource drop using the global drop position.
-                  final targetResourceId = details.dropPosition != null
-                      ? _resolveResourceAtPosition(details.dropPosition!)
-                      : null;
-                  widget.onDragEnd!(TideDragEndDetails(
-                    event: details.event,
-                    newStart: details.newStart,
-                    newEnd: details.newEnd,
-                    newResourceId: targetResourceId ?? resource.id,
-                    sourceResourceId: details.sourceResourceId,
-                    dropPosition: details.dropPosition,
-                  ));
-                }
-              : null,
+          onDragEnd: (details) {
+            // Resolve cross-resource drop using the global drop position.
+            final targetResourceId = details.dropPosition != null
+                ? _resolveResourceAtPosition(details.dropPosition!)
+                : null;
+            _handleRowDragEnd(TideDragEndDetails(
+              event: details.event,
+              newStart: details.newStart,
+              newEnd: details.newEnd,
+              newResourceId: targetResourceId ?? resource.id,
+              sourceResourceId: details.sourceResourceId,
+              dropPosition: details.dropPosition,
+            ));
+          },
           onResizeEnd: widget.onResizeEnd,
+          crossDragEvent: _crossDragEvent,
+          crossDragStart: _crossDragStart,
+          crossDragEnd: _crossDragEnd,
+          crossDragTargetResourceId: _crossDragTargetResourceId,
+          crossDragSourceResourceId: _crossDragSourceResourceId,
+          onCrossDragUpdate: _onCrossDragUpdate,
+          onCrossDragEnd: _onCrossDragEnd,
         );
       }).toList(),
     );
+  }
+
+  void _onCrossDragUpdate(
+    TideEvent event,
+    DateTime proposedStart,
+    DateTime? proposedEnd,
+    String sourceResourceId,
+    Offset globalPosition,
+  ) {
+    final targetResourceId = _resolveResourceAtPosition(globalPosition);
+    final isCrossResource =
+        targetResourceId != null && targetResourceId != sourceResourceId;
+
+    if (!isCrossResource && _crossDragEvent == null) {
+      return; // Within source row, no cross-drag active — skip.
+    }
+
+    if (!isCrossResource && _crossDragEvent != null) {
+      // Pointer moved back to source row — clear cross-drag.
+      setState(() {
+        _crossDragEvent = null;
+        _crossDragStart = null;
+        _crossDragEnd = null;
+        _crossDragTargetResourceId = null;
+        _crossDragSourceResourceId = null;
+      });
+      return;
+    }
+
+    // Cross-resource drag — only update if something changed.
+    if (targetResourceId != _crossDragTargetResourceId ||
+        proposedStart != _crossDragStart ||
+        proposedEnd != _crossDragEnd) {
+      setState(() {
+        _crossDragEvent = event;
+        _crossDragStart = proposedStart;
+        _crossDragEnd = proposedEnd;
+        _crossDragTargetResourceId = targetResourceId;
+        _crossDragSourceResourceId = sourceResourceId;
+      });
+    }
+  }
+
+  void _onCrossDragEnd() {
+    if (_crossDragEvent != null) {
+      setState(() {
+        _crossDragEvent = null;
+        _crossDragStart = null;
+        _crossDragEnd = null;
+        _crossDragTargetResourceId = null;
+        _crossDragSourceResourceId = null;
+      });
+    }
+  }
+
+  /// Optimistically updates [_events] when an event is dropped on a different
+  /// resource so that any subsequent parent rebuild uses correct data.
+  void _handleRowDragEnd(TideDragEndDetails details) {
+    if (details.newResourceId != null && details.sourceResourceId != null) {
+      final idx = _events.indexWhere((e) => e.id == details.event.id);
+      if (idx >= 0) {
+        final event = _events[idx];
+        if (event.resourceIds != null) {
+          final newIds = event.resourceIds!
+              .map((id) =>
+                  id == details.sourceResourceId ? details.newResourceId! : id)
+              .toList();
+          ++_loadGeneration; // Invalidate any pending _loadData
+          setState(() {
+            _events = List<TideEvent>.from(_events);
+            _events[idx] = event.copyWith(
+              resourceIds: newIds,
+              startTime: details.newStart,
+              endTime: details.newEnd,
+            );
+          });
+        }
+      }
+    }
+    // Forward to the app's callback.
+    widget.onDragEnd?.call(details);
   }
 
   /// Determines which resource row contains the given global position.

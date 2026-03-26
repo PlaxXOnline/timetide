@@ -400,6 +400,7 @@ class _TideDragHandlerState extends State<TideDragHandler> {
   }
 
   void _onLongPressEnd(LongPressEndDetails details) {
+    debugPrint('[HANDLER] _onLongPressEnd called');
     _endDrag(details.globalPosition);
   }
 
@@ -414,6 +415,7 @@ class _TideDragHandlerState extends State<TideDragHandler> {
   }
 
   void _onPanEnd(DragEndDetails details) {
+    debugPrint('[HANDLER] _onPanEnd called');
     _endDrag(_currentDragOffset);
   }
 
@@ -600,6 +602,7 @@ class _TideDragHandlerState extends State<TideDragHandler> {
   }
 
   void _endDrag(Offset globalPosition) {
+    debugPrint('[HANDLER] _endDrag called, _isDragging=$_isDragging, _dragMode=$_dragMode');
     if (!_isDragging) return;
     _isDragging = false;
 
