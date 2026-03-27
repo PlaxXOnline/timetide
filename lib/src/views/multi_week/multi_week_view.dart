@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
 
@@ -28,6 +30,12 @@ class TideMultiWeekView extends StatefulWidget {
     this.onMoreEventsTap,
     this.cellBuilder,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   }) : assert(numberOfWeeks >= 2 && numberOfWeeks <= 6);
 
   /// The controller managing navigation, data, and selection.
@@ -62,6 +70,24 @@ class TideMultiWeekView extends StatefulWidget {
 
   /// Custom builder for event items within cells.
   final Widget Function(BuildContext, TideEvent)? eventBuilder;
+
+  /// Whether events can be dragged.
+  final bool allowDragAndDrop;
+
+  /// Whether events can be resized.
+  final bool allowResize;
+
+  /// Time grid snap interval for drag operations.
+  final Duration? dragSnapInterval;
+
+  /// When the drag gesture starts.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
 
   @override
   State<TideMultiWeekView> createState() => _TideMultiWeekViewState();
@@ -235,31 +261,56 @@ class _TideMultiWeekViewState extends State<TideMultiWeekView> {
                 if (widget.eventBuilder != null) {
                   return widget.eventBuilder!(context, event);
                 }
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-                  child: GestureDetector(
+
+                Widget eventWidget = DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: event.color ?? theme.primaryColor,
+                    borderRadius:
+                        const BorderRadius.all(Radius.circular(2)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 1),
+                    child: Text(
+                      event.subject,
+                      style: theme.eventTitleStyle.copyWith(fontSize: 10),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                );
+
+                if (widget.allowDragAndDrop) {
+                  eventWidget = TideDragHandler(
+                    event: event,
+                    controller: widget.controller,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    snapInterval: widget.dragSnapInterval,
+                    showGhost: true,
                     onTap: widget.onEventTap != null
                         ? () => widget.onEventTap!(event)
                         : null,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: event.color ?? theme.primaryColor,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(2)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 1),
-                        child: Text(
-                          event.subject,
-                          style: theme.eventTitleStyle.copyWith(fontSize: 10),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ),
+                    onDragEnd: widget.onDragEnd != null
+                        ? (details) async {
+                            widget.onDragEnd!(details);
+                            return true;
+                          }
+                        : null,
+                    child: eventWidget,
+                  );
+                } else {
+                  eventWidget = GestureDetector(
+                    onTap: widget.onEventTap != null
+                        ? () => widget.onEventTap!(event)
+                        : null,
+                    child: eventWidget,
+                  );
+                }
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                  child: eventWidget,
                 );
               }),
               // "+N more" indicator.

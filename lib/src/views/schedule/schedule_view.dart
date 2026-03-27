@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
 import 'schedule_item.dart';
@@ -25,6 +27,12 @@ class TideScheduleView extends StatefulWidget {
     this.eventBuilder,
     this.dateHeaderBuilder,
     this.emptyBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, selection, and data.
@@ -44,6 +52,24 @@ class TideScheduleView extends StatefulWidget {
 
   /// Builder for the empty state.
   final WidgetBuilder? emptyBuilder;
+
+  /// Whether events can be dragged.
+  final bool allowDragAndDrop;
+
+  /// Whether events can be resized.
+  final bool allowResize;
+
+  /// Time grid snap interval for drag operations.
+  final Duration? dragSnapInterval;
+
+  /// When the drag gesture starts.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
 
   @override
   State<TideScheduleView> createState() => _TideScheduleViewState();
@@ -235,6 +261,26 @@ class _TideScheduleViewState extends State<TideScheduleView> {
   Widget _buildEventItem(BuildContext context, TideEvent event) {
     if (widget.eventBuilder != null) {
       return widget.eventBuilder!(context, event);
+    }
+
+    if (widget.allowDragAndDrop) {
+      return TideDragHandler(
+        event: event,
+        controller: widget.controller,
+        dragStartBehavior: widget.dragStartBehavior,
+        snapInterval: widget.dragSnapInterval,
+        showGhost: true,
+        onTap: widget.onEventTap != null ? () => widget.onEventTap!(event) : null,
+        onDragEnd: widget.onDragEnd != null
+            ? (details) async {
+                widget.onDragEnd!(details);
+                return true;
+              }
+            : null,
+        child: TideScheduleItem(
+          event: event,
+        ),
+      );
     }
 
     return TideScheduleItem(

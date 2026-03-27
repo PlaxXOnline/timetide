@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
@@ -35,6 +36,12 @@ class TideMonthView extends StatefulWidget {
     this.onDateTap,
     this.eventBuilder,
     this.emptyBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, selection, and data.
@@ -75,6 +82,24 @@ class TideMonthView extends StatefulWidget {
 
   /// Builder for the empty state in the agenda panel.
   final WidgetBuilder? emptyBuilder;
+
+  /// Whether events can be dragged.
+  final bool allowDragAndDrop;
+
+  /// Whether events can be resized.
+  final bool allowResize;
+
+  /// Time grid snap interval for drag operations.
+  final Duration? dragSnapInterval;
+
+  /// When the drag gesture starts.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
 
   @override
   State<TideMonthView> createState() => _TideMonthViewState();
@@ -308,6 +333,11 @@ class _TideMonthViewState extends State<TideMonthView> {
       },
       onEventTap: widget.onEventTap,
       eventBuilder: widget.eventBuilder,
+      allowDragAndDrop: widget.allowDragAndDrop,
+      controller: widget.controller,
+      dragStartBehavior: widget.dragStartBehavior,
+      dragSnapInterval: widget.dragSnapInterval,
+      onDragEnd: widget.onDragEnd,
     );
   }
 

@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 
+import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
 
@@ -35,6 +38,11 @@ class TideMonthCell extends StatelessWidget {
     this.onTap,
     this.onEventTap,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.controller,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.dragSnapInterval,
+    this.onDragEnd,
   });
 
   /// The date this cell represents.
@@ -66,6 +74,21 @@ class TideMonthCell extends StatelessWidget {
 
   /// Custom builder for event display in the cell.
   final Widget Function(BuildContext context, TideEvent event)? eventBuilder;
+
+  /// Whether events can be dragged.
+  final bool allowDragAndDrop;
+
+  /// The calendar controller (needed by TideDragHandler).
+  final TideController? controller;
+
+  /// When the drag gesture starts.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Time grid snap interval for drag operations.
+  final Duration? dragSnapInterval;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -215,26 +238,48 @@ class TideMonthCell extends StatelessWidget {
 
     // Text mode
     final color = event.color ?? theme.primaryColor;
+    Widget eventWidget = Container(
+      margin: const EdgeInsets.only(top: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: const BorderRadius.all(Radius.circular(2)),
+      ),
+      child: Text(
+        event.subject,
+        style: theme.eventTitleStyle.copyWith(fontSize: 10),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    if (allowDragAndDrop && controller != null) {
+      eventWidget = TideDragHandler(
+        event: event,
+        controller: controller!,
+        dragStartBehavior: dragStartBehavior,
+        snapInterval: dragSnapInterval,
+        showGhost: true,
+        onTap: onEventTap != null ? () => onEventTap!(event) : null,
+        onDragEnd: onDragEnd != null
+            ? (details) async {
+                onDragEnd!(details);
+                return true;
+              }
+            : null,
+        child: eventWidget,
+      );
+    } else {
+      eventWidget = GestureDetector(
+        onTap: onEventTap != null ? () => onEventTap!(event) : null,
+        child: eventWidget,
+      );
+    }
+
     return Semantics(
       label: 'Event: ${event.subject}',
       button: true,
-      child: GestureDetector(
-        onTap: onEventTap != null ? () => onEventTap!(event) : null,
-        child: Container(
-          margin: const EdgeInsets.only(top: 1),
-          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: const BorderRadius.all(Radius.circular(2)),
-          ),
-          child: Text(
-            event.subject,
-            style: theme.eventTitleStyle.copyWith(fontSize: 10),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
+      child: eventWidget,
     );
   }
 

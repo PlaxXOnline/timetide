@@ -474,12 +474,24 @@ class _TideCalendarState extends State<TideCalendar> {
           onDateTap: widget.onDateTap,
           eventBuilder: widget.eventBuilder,
           firstDayOfWeek: widget.firstDayOfWeek ?? DateTime.monday,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.schedule:
         return TideScheduleView(
           controller: _controller,
           onEventTap: widget.onEventTap,
           eventBuilder: widget.eventBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.timelineDay:
         return TideTimelineDayView(
@@ -533,6 +545,12 @@ class _TideCalendarState extends State<TideCalendar> {
           resourceHeaderWidth: widget.resourceHeaderWidth,
           onEventTap: widget.onEventTap,
           resourceHeaderBuilder: widget.resourceHeaderBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.multiWeek:
         return TideMultiWeekView(
@@ -540,11 +558,23 @@ class _TideCalendarState extends State<TideCalendar> {
           onEventTap: widget.onEventTap,
           onDateTap: widget.onDateTap,
           eventBuilder: widget.eventBuilder,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.year:
         return TideYearView(
           controller: _controller,
           onDayTap: widget.onDateTap,
+          allowDragAndDrop: widget.allowDragAndDrop,
+          allowResize: widget.allowResize,
+          dragSnapInterval: widget.dragSnapInterval,
+          dragStartBehavior: widget.dragStartBehavior,
+          onDragEnd: widget.onDragEnd,
+          onResizeEnd: widget.onResizeEnd,
         );
       case TideView.resourceDay:
         return TideResourceDayView(

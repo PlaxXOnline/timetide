@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
 
@@ -24,6 +25,12 @@ class TideYearView extends StatefulWidget {
     this.heatMapColorScale,
     this.onMonthTap,
     this.onDayTap,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, data, and selection.
@@ -51,6 +58,24 @@ class TideYearView extends StatefulWidget {
 
   /// Called when a specific day is tapped.
   final ValueChanged<DateTime>? onDayTap;
+
+  /// Whether events can be dragged. Present for API consistency.
+  final bool allowDragAndDrop;
+
+  /// Whether events can be resized. Present for API consistency.
+  final bool allowResize;
+
+  /// Time grid snap interval for drag operations. Present for API consistency.
+  final Duration? dragSnapInterval;
+
+  /// When the drag gesture starts. Present for API consistency.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes. Present for API consistency.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes. Present for API consistency.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
 
   @override
   State<TideYearView> createState() => _TideYearViewState();

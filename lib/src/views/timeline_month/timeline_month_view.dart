@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../core/controller.dart';
+import '../../core/models/drag_details.dart';
 import '../../core/models/event.dart';
 import '../../core/models/resource.dart';
+import '../../interaction/drag_drop/drag_handler.dart';
 import '../../rendering/event_layout_engine.dart';
 import '../../theme/tide_theme.dart';
 import '../../theme/tide_theme_data.dart';
@@ -29,6 +31,12 @@ class TideTimelineMonthView extends StatefulWidget {
     this.onEventTap,
     this.resourceHeaderBuilder,
     this.eventBuilder,
+    this.allowDragAndDrop = false,
+    this.allowResize = false,
+    this.dragSnapInterval,
+    this.dragStartBehavior = TideDragStartBehavior.adaptive,
+    this.onDragEnd,
+    this.onResizeEnd,
   });
 
   /// The controller managing navigation, data, and selection.
@@ -60,6 +68,24 @@ class TideTimelineMonthView extends StatefulWidget {
 
   /// Custom builder for event tiles.
   final Widget Function(BuildContext, TideEvent, TideEventBounds)? eventBuilder;
+
+  /// Whether events can be dragged.
+  final bool allowDragAndDrop;
+
+  /// Whether events can be resized.
+  final bool allowResize;
+
+  /// Time grid snap interval for drag operations.
+  final Duration? dragSnapInterval;
+
+  /// When the drag gesture starts.
+  final TideDragStartBehavior dragStartBehavior;
+
+  /// Called when a drag operation completes.
+  final void Function(TideDragEndDetails details)? onDragEnd;
+
+  /// Called when a resize operation completes.
+  final void Function(TideResizeEndDetails details)? onResizeEnd;
 
   @override
   State<TideTimelineMonthView> createState() => _TideTimelineMonthViewState();
@@ -361,6 +387,47 @@ class _TideTimelineMonthViewState extends State<TideTimelineMonthView> {
         );
       }
 
+      Widget eventWidget = DecoratedBox(
+        decoration: BoxDecoration(
+          color: event.color ?? theme.primaryColor,
+          borderRadius: theme.eventBorderRadius,
+        ),
+        child: Padding(
+          padding: theme.eventPadding,
+          child: Text(
+            event.subject,
+            style: theme.eventTitleStyle,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      );
+
+      if (widget.allowDragAndDrop) {
+        eventWidget = TideDragHandler(
+          event: event,
+          controller: widget.controller,
+          dragStartBehavior: widget.dragStartBehavior,
+          snapInterval: widget.dragSnapInterval,
+          showGhost: true,
+          onTap: widget.onEventTap != null ? () => widget.onEventTap!(event) : null,
+          onDragEnd: widget.onDragEnd != null
+              ? (details) async {
+                  widget.onDragEnd!(details);
+                  return true;
+                }
+              : null,
+          child: eventWidget,
+        );
+      } else {
+        eventWidget = GestureDetector(
+          onTap: widget.onEventTap != null
+              ? () => widget.onEventTap!(event)
+              : null,
+          child: eventWidget,
+        );
+      }
+
       return Positioned(
         left: left,
         top: 2,
@@ -368,26 +435,7 @@ class _TideTimelineMonthViewState extends State<TideTimelineMonthView> {
         height: widget.resourceRowHeight - 4,
         child: Semantics(
           label: 'Event: ${event.subject}',
-          child: GestureDetector(
-            onTap: widget.onEventTap != null
-                ? () => widget.onEventTap!(event)
-                : null,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: event.color ?? theme.primaryColor,
-                borderRadius: theme.eventBorderRadius,
-              ),
-              child: Padding(
-                padding: theme.eventPadding,
-                child: Text(
-                  event.subject,
-                  style: theme.eventTitleStyle,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-            ),
-          ),
+          child: eventWidget,
         ),
       );
     }).toList();
