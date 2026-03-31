@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Fix automated publishing via GitHub Actions OIDC.
+
 ## 1.0.1
 
 - Fix repository and issue tracker URLs in pubspec.yaml.
