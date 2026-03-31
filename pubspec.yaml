@@ -4,8 +4,8 @@ description: >-
   scheduling, drag & drop, RRULE recurrence, and iCalendar support.
   Widget-layer only.
 version: 1.0.0
-repository: https://github.com/janikkahle/timetide
-issue_tracker: https://github.com/janikkahle/timetide/issues
+repository: https://github.com/PlaxXOnline/timetide
+issue_tracker: https://github.com/PlaxXOnline/timetide/issues
 
 topics:
   - calendar
