@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fix automated publishing with tag-based OIDC workflow.
+
 ## 1.0.2
 
 - Fix automated publishing via GitHub Actions OIDC.

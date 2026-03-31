@@ -3,7 +3,7 @@ description: >-
   A comprehensive Flutter scheduling calendar with 13 views, multi-resource
   scheduling, drag & drop, RRULE recurrence, and iCalendar support.
   Widget-layer only.
-version: 1.0.2
+version: 1.0.3
 repository: https://github.com/PlaxXOnline/timetide
 issue_tracker: https://github.com/PlaxXOnline/timetide/issues
 
