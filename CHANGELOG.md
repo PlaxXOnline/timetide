@@ -1,6 +1,6 @@
-## 0.1.0
+## 1.0.0
 
-Initial release of timetide.
+Initial stable release of timetide.
 
 ### Views
 - 13 calendar views: day, week, work week, month, schedule, timeline day/week/work week/month, multi-week, year, resource day, resource week

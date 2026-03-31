@@ -1,0 +1,72 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pubspec.yaml'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect version change
+        id: version
+        run: |
+          NEW_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          OLD_VERSION=$(git show HEAD~1:pubspec.yaml | grep '^version:' | awk '{print $2}')
+          echo "new=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "old=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: $OLD_VERSION → $NEW_VERSION"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged ($NEW_VERSION), skipping publish."
+          fi
+
+      - name: Check tag does not exist
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.new }}"
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+            echo "::error::Tag $TAG already exists on remote."
+            exit 1
+          fi
+
+      - uses: subosito/flutter-action@v2
+        if: steps.version.outputs.changed == 'true'
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: flutter pub get
+
+      - name: Analyze
+        if: steps.version.outputs.changed == 'true'
+        run: flutter analyze
+
+      - name: Test
+        if: steps.version.outputs.changed == 'true'
+        run: flutter test
+
+      - name: Create git tag
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.new }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Publish to pub.dev
+        if: steps.version.outputs.changed == 'true'
+        run: dart pub publish --force

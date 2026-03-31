@@ -10,7 +10,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  timetide: ^0.1.0
+  timetide: ^1.0.0
 ```
 
 Then run:
