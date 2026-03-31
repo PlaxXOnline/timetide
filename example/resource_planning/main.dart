@@ -1,13 +1,5 @@
-// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/widgets.dart';
-import 'package:timetide/src/core/controller.dart';
-import 'package:timetide/src/core/datasource_in_memory.dart';
-import 'package:timetide/src/core/models/drag_details.dart';
-import 'package:timetide/src/core/models/event.dart';
-import 'package:timetide/src/core/models/resource.dart';
-import 'package:timetide/src/core/models/view.dart';
-import 'package:timetide/src/theme/tide_theme_data.dart';
-import 'package:timetide/src/widgets/tide_calendar.dart';
+import 'package:timetide/timetide.dart';
 
 /// Team & room planning example using week view with resources.
 ///
@@ -28,7 +20,7 @@ class ResourcePlanningApp extends StatelessWidget {
     return WidgetsApp(
       title: 'Resource Planning',
       color: const Color(0xFF3F51B5),
-      home: ResourcePlanningScreen(),
+      home: const ResourcePlanningScreen(),
     );
   }
 }

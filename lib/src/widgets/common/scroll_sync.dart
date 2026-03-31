@@ -22,12 +22,16 @@ import 'package:flutter/widgets.dart';
 /// }
 /// ```
 class TideScrollSync {
+  /// Creates a [TideScrollSync] linking [primary] and [secondary].
   TideScrollSync({required this.primary, required this.secondary}) {
     primary.addListener(_onPrimaryScroll);
     secondary.addListener(_onSecondaryScroll);
   }
 
+  /// The primary scroll controller (e.g. the header).
   final ScrollController primary;
+
+  /// The secondary scroll controller kept in sync with [primary].
   final ScrollController secondary;
   bool _syncing = false;
 

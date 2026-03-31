@@ -1,4 +1,4 @@
-/// All 11 calendar view types supported by timetide.
+/// All 13 calendar view types supported by timetide.
 enum TideView {
   /// Single day view showing hours vertically.
   day,

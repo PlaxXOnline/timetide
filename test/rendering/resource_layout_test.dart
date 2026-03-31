@@ -90,7 +90,7 @@ void main() {
       );
 
       expect(results.length, 3);
-      final rowH = height / 3;
+      const rowH = height / 3;
       for (var i = 0; i < 3; i++) {
         expect(results[i].bounds.top, closeTo(i * rowH, 0.01));
         expect(results[i].bounds.height, closeTo(rowH, 0.01));
@@ -166,7 +166,7 @@ void main() {
       );
 
       expect(results.length, 3);
-      final colW = width / 3;
+      const colW = width / 3;
       for (var i = 0; i < 3; i++) {
         expect(results[i].bounds.left, closeTo(i * colW, 0.01));
         expect(results[i].bounds.width, closeTo(colW, 0.01));

@@ -23,11 +23,11 @@ void main() {
     });
 
     test('all fields populated', () {
-      final resource = TideResource(
+      const resource = TideResource(
         id: 'r2',
         displayName: 'Bob',
         color: blue,
-        avatar: const NetworkImage('https://example.com/avatar.png'),
+        avatar: NetworkImage('https://example.com/avatar.png'),
         sortOrder: 5,
         groupId: 'grp-1',
         metadata: {'role': 'lead'},

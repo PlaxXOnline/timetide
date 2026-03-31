@@ -13,7 +13,10 @@ typedef TideExternalDragEndCallback = void Function(
 /// [TideExternalDragScope] so they can communicate regardless of their
 /// position in the widget tree.
 class TideExternalDragScope extends StatefulWidget {
+  /// Creates a [TideExternalDragScope].
   const TideExternalDragScope({super.key, required this.child});
+
+  /// The widget subtree that contains drag sources and targets.
   final Widget child;
 
   /// Returns the nearest [TideExternalDragNotifier] or null.
@@ -50,9 +53,13 @@ class TideExternalDragNotifier extends ChangeNotifier {
   TideExternalDragData? _data;
   Offset? _position;
 
+  /// The payload of the most recent drop, or `null` when idle.
   TideExternalDragData? get data => _data;
+
+  /// The global position of the most recent drop, or `null` when idle.
   Offset? get position => _position;
 
+  /// Records a drop event and notifies listeners.
   void drop(TideExternalDragData data, Offset position) {
     _data = data;
     _position = position;

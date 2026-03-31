@@ -482,12 +482,12 @@ void main() {
 
   group('TideRRuleGenerator', () {
     test('generates minimal FREQ rule', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       expect(TideRRuleGenerator.generate(rule), 'RRULE:FREQ=DAILY');
     });
 
     test('generates INTERVAL', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
       );
@@ -498,12 +498,12 @@ void main() {
     });
 
     test('omits INTERVAL when 1', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
       expect(TideRRuleGenerator.generate(rule), 'RRULE:FREQ=WEEKLY');
     });
 
     test('generates COUNT', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 10,
       );
@@ -533,7 +533,7 @@ void main() {
     });
 
     test('generates BYDAY with plain weekdays', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -548,7 +548,7 @@ void main() {
     });
 
     test('generates BYDAY with ordinals', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
       );
@@ -559,7 +559,7 @@ void main() {
     });
 
     test('generates BYDAY with negative ordinals', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.monday, ordinal: -1)],
       );
@@ -570,7 +570,7 @@ void main() {
     });
 
     test('generates BYMONTHDAY', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [1, 15],
       );
@@ -581,7 +581,7 @@ void main() {
     });
 
     test('generates BYMONTH', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [1, 7],
       );
@@ -592,7 +592,7 @@ void main() {
     });
 
     test('generates BYSETPOS', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday)],
         bySetPos: [-1],
@@ -604,7 +604,7 @@ void main() {
     });
 
     test('generates BYHOUR and BYMINUTE', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byHour: [9, 17],
         byMinute: [0, 30],
@@ -616,7 +616,7 @@ void main() {
     });
 
     test('generates BYYEARDAY', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byYearDay: [1, 100, -1],
       );
@@ -627,7 +627,7 @@ void main() {
     });
 
     test('generates BYWEEKNO', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byWeekNo: [1, 26],
       );
@@ -638,7 +638,7 @@ void main() {
     });
 
     test('generates WKST when not monday', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         weekStart: TideWeekday.sunday,
       );
@@ -649,7 +649,7 @@ void main() {
     });
 
     test('omits WKST when monday (default)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         weekStart: TideWeekday.monday,
       );
@@ -659,7 +659,7 @@ void main() {
     test('generates EXDATE', () {
       final rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
-        byDay: [TideByDay(weekday: TideWeekday.monday)],
+        byDay: [const TideByDay(weekday: TideWeekday.monday)],
         exDates: [DateTime.utc(2026, 4, 6)],
       );
       final generated = TideRRuleGenerator.generate(rule);
@@ -676,7 +676,7 @@ void main() {
     });
 
     test('generates complex rule with all properties', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 2,
         count: 24,
@@ -775,14 +775,14 @@ void main() {
 
   group('TideRecurrenceRule model', () {
     test('equality for identical rules', () {
-      final a = TideRecurrenceRule(
+      const a = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
           TideByDay(weekday: TideWeekday.friday),
         ],
       );
-      final b = TideRecurrenceRule(
+      const b = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -794,13 +794,13 @@ void main() {
     });
 
     test('inequality for different rules', () {
-      final a = TideRecurrenceRule(frequency: TideFrequency.daily);
-      final b = TideRecurrenceRule(frequency: TideFrequency.weekly);
+      const a = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const b = TideRecurrenceRule(frequency: TideFrequency.weekly);
       expect(a, isNot(equals(b)));
     });
 
     test('copyWith preserves unmodified fields', () {
-      final original = TideRecurrenceRule(
+      const original = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [TideByDay(weekday: TideWeekday.monday)],
@@ -814,7 +814,7 @@ void main() {
     });
 
     test('toString includes non-default fields', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 5,
       );

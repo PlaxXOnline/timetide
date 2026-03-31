@@ -110,7 +110,7 @@ class TideCalendarHeader extends StatelessWidget {
   }
 
   String _formatDateLabel(DateTime date, TideView view) {
-    final months = const [
+    const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December',
     ];

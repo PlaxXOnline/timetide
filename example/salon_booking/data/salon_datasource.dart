@@ -1,5 +1,4 @@
-import 'package:timetide/src/core/datasource_in_memory.dart';
-import 'package:timetide/src/core/models/event.dart';
+import 'package:timetide/timetide.dart';
 
 import 'mock_data.dart';
 

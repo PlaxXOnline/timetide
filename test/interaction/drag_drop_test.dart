@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timetide/src/core/controller.dart';
-import 'package:timetide/src/core/models/drag_details.dart';
 import 'package:timetide/src/core/models/event.dart';
 import 'package:timetide/src/interaction/drag_drop/conflict_detector.dart';
 import 'package:timetide/src/interaction/drag_drop/drag_handler.dart';

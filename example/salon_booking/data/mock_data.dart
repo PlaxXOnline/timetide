@@ -1,7 +1,6 @@
 import 'dart:ui';
 
-import 'package:timetide/src/core/models/event.dart';
-import 'package:timetide/src/core/models/resource.dart';
+import 'package:timetide/timetide.dart';
 
 /// Sample employees for the salon.
 final List<TideResource> salonEmployees = [

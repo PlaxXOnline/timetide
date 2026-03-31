@@ -58,9 +58,9 @@ void main() {
         receivedPosition = notifier.position;
       });
 
-      final data = TideExternalDragData(
+      const data = TideExternalDragData(
         subject: 'Test',
-        duration: const Duration(hours: 1),
+        duration: Duration(hours: 1),
       );
       notifier.drop(data, const Offset(100, 200));
 
@@ -73,9 +73,9 @@ void main() {
       final notifier = TideExternalDragNotifier();
       addTearDown(notifier.dispose);
 
-      final data = TideExternalDragData(
+      const data = TideExternalDragData(
         subject: 'Test',
-        duration: const Duration(hours: 1),
+        duration: Duration(hours: 1),
       );
       notifier.drop(data, const Offset(100, 200));
 
@@ -136,9 +136,9 @@ void main() {
       );
       expect(notifier, isNotNull);
 
-      final data = TideExternalDragData(
+      const data = TideExternalDragData(
         subject: 'Meeting',
-        duration: const Duration(hours: 1),
+        duration: Duration(hours: 1),
       );
       notifier!.drop(data, targetCenter);
 
@@ -176,9 +176,9 @@ void main() {
       final notifier = TideExternalDragScope.of(
         tester.element(find.byType(TideDragTarget)),
       );
-      final data = TideExternalDragData(
+      const data = TideExternalDragData(
         subject: 'Meeting',
-        duration: const Duration(hours: 1),
+        duration: Duration(hours: 1),
       );
       notifier!.drop(data, const Offset(9999, 9999));
 
@@ -194,13 +194,13 @@ void main() {
           child: Overlay(
             initialEntries: [
               OverlayEntry(
-                builder: (_) => TideExternalDragScope(
+                builder: (_) => const TideExternalDragScope(
                   child: TideDragSource(
                     data: TideExternalDragData(
                       subject: 'Draggable',
-                      duration: const Duration(hours: 1),
+                      duration: Duration(hours: 1),
                     ),
-                    child: const Text('Drag me'),
+                    child: Text('Drag me'),
                   ),
                 ),
               ),
@@ -214,15 +214,15 @@ void main() {
 
     testWidgets('renders child when disabled', (tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: TideDragSource(
             data: TideExternalDragData(
               subject: 'Draggable',
-              duration: const Duration(hours: 1),
+              duration: Duration(hours: 1),
             ),
             enabled: false,
-            child: const Text('Disabled'),
+            child: Text('Disabled'),
           ),
         ),
       );

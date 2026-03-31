@@ -207,7 +207,7 @@ void main() {
       );
 
       expect(results.length, 3);
-      final colWidth = width / 3;
+      const colWidth = width / 3;
       for (final r in results) {
         expect(r.bounds.width, closeTo(colWidth, 0.01));
       }

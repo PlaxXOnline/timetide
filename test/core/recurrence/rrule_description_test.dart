@@ -7,17 +7,17 @@ void main() {
 
   group('DAILY descriptions', () {
     test('every day (en)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       expect(TideRRuleDescription.describe(rule), 'Every day');
     });
 
     test('every day (de)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       expect(TideRRuleDescription.describe(rule, locale: 'de'), 'Jeden Tag');
     });
 
     test('every 3 days (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         interval: 3,
       );
@@ -25,7 +25,7 @@ void main() {
     });
 
     test('every 3 days (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         interval: 3,
       );
@@ -37,17 +37,17 @@ void main() {
 
   group('WEEKLY descriptions', () {
     test('every week (en)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
       expect(TideRRuleDescription.describe(rule), 'Every week');
     });
 
     test('every week (de)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.weekly);
       expect(TideRRuleDescription.describe(rule, locale: 'de'), 'Jede Woche');
     });
 
     test('every week on Monday, Wednesday, Friday (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('every week on Montag, Mittwoch, Freitag (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('every 2 weeks (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
       );
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('every 2 weeks (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
       );
@@ -96,7 +96,7 @@ void main() {
     });
 
     test('every 2 weeks on Tuesday, Thursday (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [
@@ -111,7 +111,7 @@ void main() {
     });
 
     test('every 2 weeks on Dienstag, Donnerstag (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [
@@ -130,17 +130,17 @@ void main() {
 
   group('MONTHLY descriptions', () {
     test('every month (en)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.monthly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.monthly);
       expect(TideRRuleDescription.describe(rule), 'Every month');
     });
 
     test('every month (de)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.monthly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.monthly);
       expect(TideRRuleDescription.describe(rule, locale: 'de'), 'Jeden Monat');
     });
 
     test('every month on the 15th (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [15],
       );
@@ -148,7 +148,7 @@ void main() {
     });
 
     test('every month on the 15. (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [15],
       );
@@ -159,7 +159,7 @@ void main() {
     });
 
     test('every month on the 1st and 15th (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [1, 15],
       );
@@ -170,7 +170,7 @@ void main() {
     });
 
     test('every 2 months on the 10th (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 2,
         byMonthDay: [10],
@@ -182,7 +182,7 @@ void main() {
     });
 
     test('every 2 months on the 10. (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 2,
         byMonthDay: [10],
@@ -194,7 +194,7 @@ void main() {
     });
 
     test('the 3rd Friday of every month (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
       );
@@ -205,7 +205,7 @@ void main() {
     });
 
     test('the 3. Freitag jeden Monats (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
       );
@@ -216,7 +216,7 @@ void main() {
     });
 
     test('the last Friday of every month (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: -1)],
       );
@@ -227,7 +227,7 @@ void main() {
     });
 
     test('the letzte Freitag jeden Monats (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: -1)],
       );
@@ -238,7 +238,7 @@ void main() {
     });
 
     test('BYSETPOS=3 with BYDAY: 3rd Friday of every month (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday)],
         bySetPos: [3],
@@ -250,7 +250,7 @@ void main() {
     });
 
     test('BYSETPOS=3 with BYDAY: 3. Freitag jeden Monats (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday)],
         bySetPos: [3],
@@ -262,7 +262,7 @@ void main() {
     });
 
     test('BYSETPOS=-1 with BYDAY: last Monday (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.monday)],
         bySetPos: [-1],
@@ -278,17 +278,17 @@ void main() {
 
   group('YEARLY descriptions', () {
     test('every year (en)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.yearly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.yearly);
       expect(TideRRuleDescription.describe(rule), 'Every year');
     });
 
     test('every year (de)', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.yearly);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.yearly);
       expect(TideRRuleDescription.describe(rule, locale: 'de'), 'Jedes Jahr');
     });
 
     test('every year on March 19 (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [3],
         byMonthDay: [19],
@@ -297,7 +297,7 @@ void main() {
     });
 
     test('every year on 19. März (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [3],
         byMonthDay: [19],
@@ -309,7 +309,7 @@ void main() {
     });
 
     test('every 2 years (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         interval: 2,
       );
@@ -317,7 +317,7 @@ void main() {
     });
 
     test('every 2 years (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         interval: 2,
       );
@@ -328,7 +328,7 @@ void main() {
     });
 
     test('every year on July 4 (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [7],
         byMonthDay: [4],
@@ -337,7 +337,7 @@ void main() {
     });
 
     test('every year in January (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [1],
       );
@@ -345,7 +345,7 @@ void main() {
     });
 
     test('every year in Januar (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [1],
       );
@@ -356,7 +356,7 @@ void main() {
     });
 
     test('4th Thursday of November every year (Thanksgiving, en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [11],
         byDay: [TideByDay(weekday: TideWeekday.thursday, ordinal: 4)],
@@ -368,7 +368,7 @@ void main() {
     });
 
     test('4. Donnerstag im November jedes Jahr (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [11],
         byDay: [TideByDay(weekday: TideWeekday.thursday, ordinal: 4)],
@@ -380,7 +380,7 @@ void main() {
     });
 
     test('every 3 years on December 25 (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         interval: 3,
         byMonth: [12],
@@ -393,7 +393,7 @@ void main() {
     });
 
     test('every 3 years on 25. Dezember (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         interval: 3,
         byMonth: [12],
@@ -410,7 +410,7 @@ void main() {
 
   group('COUNT suffix', () {
     test('daily with COUNT (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 10,
       );
@@ -418,7 +418,7 @@ void main() {
     });
 
     test('daily with COUNT (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 10,
       );
@@ -429,7 +429,7 @@ void main() {
     });
 
     test('weekly with BYDAY + COUNT (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [TideByDay(weekday: TideWeekday.monday)],
         count: 5,
@@ -441,7 +441,7 @@ void main() {
     });
 
     test('monthly with COUNT (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [1],
         count: 12,
@@ -482,9 +482,9 @@ void main() {
       final rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
-          TideByDay(weekday: TideWeekday.monday),
-          TideByDay(weekday: TideWeekday.wednesday),
-          TideByDay(weekday: TideWeekday.friday),
+          const TideByDay(weekday: TideWeekday.monday),
+          const TideByDay(weekday: TideWeekday.wednesday),
+          const TideByDay(weekday: TideWeekday.friday),
         ],
         until: DateTime(2026, 6, 30),
       );
@@ -511,10 +511,10 @@ void main() {
 
   group('Ordinal formatting (en)', () {
     test('1st, 2nd, 3rd, 4th, 11th, 21st ordinals', () {
-      final desc = TideRRuleDescription.describe;
+      const desc = TideRRuleDescription.describe;
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [1],
         )),
@@ -522,7 +522,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [2],
         )),
@@ -530,7 +530,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [3],
         )),
@@ -538,7 +538,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [4],
         )),
@@ -546,7 +546,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [11],
         )),
@@ -554,7 +554,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [21],
         )),
@@ -562,7 +562,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [22],
         )),
@@ -570,7 +570,7 @@ void main() {
       );
 
       expect(
-        desc(TideRecurrenceRule(
+        desc(const TideRecurrenceRule(
           frequency: TideFrequency.monthly,
           byMonthDay: [23],
         )),
@@ -648,7 +648,7 @@ void main() {
 
   group('Fallback locale', () {
     test('unknown locale falls back to English', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       expect(TideRRuleDescription.describe(rule, locale: 'fr'), 'Every day');
     });
   });
@@ -657,7 +657,7 @@ void main() {
 
   group('Combined descriptions', () {
     test('weekly MO/WE/FR with COUNT (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -675,7 +675,7 @@ void main() {
     test('monthly 3rd Friday with UNTIL (de)', () {
       final rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
-        byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
+        byDay: [const TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
         until: DateTime(2027, 12, 31),
       );
       expect(
@@ -689,8 +689,8 @@ void main() {
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [
-          TideByDay(weekday: TideWeekday.monday),
-          TideByDay(weekday: TideWeekday.wednesday),
+          const TideByDay(weekday: TideWeekday.monday),
+          const TideByDay(weekday: TideWeekday.wednesday),
         ],
         until: DateTime(2026, 12, 31),
       );
@@ -701,7 +701,7 @@ void main() {
     });
 
     test('yearly on March 19 with COUNT (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [3],
         byMonthDay: [19],
@@ -718,7 +718,7 @@ void main() {
 
   group('2nd ordinal descriptions', () {
     test('the 2nd Monday of every month (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.monday, ordinal: 2)],
       );
@@ -729,7 +729,7 @@ void main() {
     });
 
     test('the 1st Tuesday of every month (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.tuesday, ordinal: 1)],
       );
@@ -740,7 +740,7 @@ void main() {
     });
 
     test('the second to last Wednesday (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.wednesday, ordinal: -2)],
       );
@@ -755,7 +755,7 @@ void main() {
 
   group('Every N months', () {
     test('every 3 months (en)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 3,
       );
@@ -763,7 +763,7 @@ void main() {
     });
 
     test('alle 3 Monate (de)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 3,
       );

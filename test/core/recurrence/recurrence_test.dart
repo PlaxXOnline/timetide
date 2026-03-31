@@ -37,7 +37,7 @@ void main() {
     group('fromRule', () {
       test('wraps existing TideRecurrenceRule', () {
         const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
-        final r = TideRecurrence.fromRule(rule);
+        const r = TideRecurrence.fromRule(rule);
         expect(r.rule, same(rule));
         expect(r.frequency, TideFrequency.daily);
       });
@@ -60,8 +60,8 @@ void main() {
         final original = TideRecurrence(
           frequency: TideFrequency.weekly,
           byDay: [
-            TideByDay(weekday: TideWeekday.monday),
-            TideByDay(weekday: TideWeekday.friday),
+            const TideByDay(weekday: TideWeekday.monday),
+            const TideByDay(weekday: TideWeekday.friday),
           ],
           interval: 2,
         );
@@ -87,9 +87,9 @@ void main() {
         final r = TideRecurrence(
           frequency: TideFrequency.weekly,
           byDay: [
-            TideByDay(weekday: TideWeekday.monday),
-            TideByDay(weekday: TideWeekday.wednesday),
-            TideByDay(weekday: TideWeekday.friday),
+            const TideByDay(weekday: TideWeekday.monday),
+            const TideByDay(weekday: TideWeekday.wednesday),
+            const TideByDay(weekday: TideWeekday.friday),
           ],
         );
         expect(r.describe(), 'Every week on Monday, Wednesday, Friday');
@@ -99,7 +99,7 @@ void main() {
         final r = TideRecurrence(
           frequency: TideFrequency.monthly,
           bySetPos: [-1],
-          byDay: [TideByDay(weekday: TideWeekday.friday)],
+          byDay: [const TideByDay(weekday: TideWeekday.friday)],
         );
         expect(r.describe(), 'The last Friday of every month');
       });
@@ -141,9 +141,9 @@ void main() {
         final r = TideRecurrence(
           frequency: TideFrequency.weekly,
           byDay: [
-            TideByDay(weekday: TideWeekday.monday),
-            TideByDay(weekday: TideWeekday.wednesday),
-            TideByDay(weekday: TideWeekday.friday),
+            const TideByDay(weekday: TideWeekday.monday),
+            const TideByDay(weekday: TideWeekday.wednesday),
+            const TideByDay(weekday: TideWeekday.friday),
           ],
           count: 6,
         );
@@ -348,7 +348,7 @@ void main() {
       test('byDay delegates to rule', () {
         final r = TideRecurrence(
           frequency: TideFrequency.weekly,
-          byDay: [TideByDay(weekday: TideWeekday.monday)],
+          byDay: [const TideByDay(weekday: TideWeekday.monday)],
         );
         expect(r.byDay, hasLength(1));
       });

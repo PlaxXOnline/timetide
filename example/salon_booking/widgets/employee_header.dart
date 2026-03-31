@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:timetide/src/core/models/resource.dart';
-import 'package:timetide/src/widgets/resource_header/resource_load_indicator.dart';
+import 'package:timetide/timetide.dart';
 
 /// Custom resource header for salon employees.
 ///

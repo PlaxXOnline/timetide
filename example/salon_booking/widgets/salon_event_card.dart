@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:timetide/src/core/models/event.dart';
+import 'package:timetide/timetide.dart';
 
 /// Custom event card for salon appointments.
 ///

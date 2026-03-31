@@ -1,11 +1,5 @@
-// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/widgets.dart';
-import 'package:timetide/src/core/controller.dart';
-import 'package:timetide/src/core/datasource_in_memory.dart';
-import 'package:timetide/src/core/models/event.dart';
-import 'package:timetide/src/core/models/view.dart';
-import 'package:timetide/src/widgets/tide_calendar.dart';
-import 'package:timetide/src/core/models/drag_details.dart';
+import 'package:timetide/timetide.dart';
 
 /// Minimal timetide example — InMemoryDatasource with sample events.
 void main() {
@@ -19,8 +13,8 @@ class BasicCalendarApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       title: 'timetide Basic Example',
-      color: Color(0xFF2196F3),
-      home: BasicCalendarScreen(),
+      color: const Color(0xFF2196F3),
+      home: const BasicCalendarScreen(),
     );
   }
 }

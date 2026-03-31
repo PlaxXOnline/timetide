@@ -170,13 +170,13 @@ class _TidePopupOverlay extends StatelessWidget {
   Offset _alignmentOffset(TidePopupAlignment alignment) {
     switch (alignment) {
       case TidePopupAlignment.above:
-        return Offset(0, -8) + offset;
+        return const Offset(0, -8) + offset;
       case TidePopupAlignment.below:
-        return Offset(0, 8) + offset;
+        return const Offset(0, 8) + offset;
       case TidePopupAlignment.left:
-        return Offset(-8, 0) + offset;
+        return const Offset(-8, 0) + offset;
       case TidePopupAlignment.right:
-        return Offset(8, 0) + offset;
+        return const Offset(8, 0) + offset;
     }
   }
 

@@ -263,7 +263,7 @@ class _TideRecurrenceEditorState extends State<TideRecurrenceEditor> {
   }
 
   Widget _buildWeekdaySelector(TideThemeData theme) {
-    final days = TideWeekday.values;
+    const days = TideWeekday.values;
     return Wrap(
       spacing: 4,
       children: [

@@ -183,10 +183,10 @@ class _TideTooltipOverlay extends StatelessWidget {
         opacity: fadeAnimation,
         child: Container(
           padding: padding,
-          decoration: BoxDecoration(
-            color: const Color(0xE6333333),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-            boxShadow: const [
+          decoration: const BoxDecoration(
+            color: Color(0xE6333333),
+            borderRadius: BorderRadius.all(Radius.circular(4)),
+            boxShadow: [
               BoxShadow(
                 color: Color(0x1A000000),
                 blurRadius: 4,

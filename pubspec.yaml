@@ -1,6 +1,6 @@
 name: timetide
 description: >
-  A comprehensive Flutter scheduling calendar package with 11 views,
+  A comprehensive Flutter scheduling calendar package with 13 views,
   multi-resource scheduling, drag & drop, RRULE recurrence, and iCalendar
   export/import. Widget-layer only — no Material or Cupertino dependency.
 version: 0.1.0

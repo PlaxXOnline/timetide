@@ -7,33 +7,35 @@ void main() {
     testWidgets('renders month view with sample events', (tester) async {
       final datasource = TideInMemoryDatasource(
         events: [
+          // Use dates far in the past so "today" highlighting never
+          // falls within the visible range, making the golden stable.
           TideEvent(
             id: '1',
             subject: 'Project Kickoff',
-            startTime: DateTime(2026, 3, 2, 10, 0),
-            endTime: DateTime(2026, 3, 2, 12, 0),
+            startTime: DateTime(2025, 1, 2, 10, 0),
+            endTime: DateTime(2025, 1, 2, 12, 0),
             color: const Color(0xFF4CAF50),
           ),
           TideEvent(
             id: '2',
             subject: 'Sprint Review',
-            startTime: DateTime(2026, 3, 13, 14, 0),
-            endTime: DateTime(2026, 3, 13, 15, 0),
+            startTime: DateTime(2025, 1, 13, 14, 0),
+            endTime: DateTime(2025, 1, 13, 15, 0),
             color: const Color(0xFF2196F3),
           ),
           TideEvent(
             id: '3',
             subject: 'Release Day',
-            startTime: DateTime(2026, 3, 20),
-            endTime: DateTime(2026, 3, 21),
+            startTime: DateTime(2025, 1, 20),
+            endTime: DateTime(2025, 1, 21),
             isAllDay: true,
             color: const Color(0xFFFF9800),
           ),
           TideEvent(
             id: '4',
             subject: 'Team Offsite',
-            startTime: DateTime(2026, 3, 25),
-            endTime: DateTime(2026, 3, 27),
+            startTime: DateTime(2025, 1, 25),
+            endTime: DateTime(2025, 1, 27),
             isAllDay: true,
             color: const Color(0xFF9C27B0),
           ),
@@ -43,7 +45,7 @@ void main() {
       final controller = TideController(
         datasource: datasource,
         initialView: TideView.month,
-        initialDate: DateTime(2026, 3, 15),
+        initialDate: DateTime(2025, 1, 15),
       );
 
       await tester.pumpWidget(

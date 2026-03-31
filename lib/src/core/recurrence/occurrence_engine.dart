@@ -520,8 +520,8 @@ class TideOccurrenceEngine {
     var hasRule = ruleIter.moveNext();
 
     while (hasRule || rDateIdx < rDates.length) {
-      DateTime? nextRule = hasRule ? ruleIter.current : null;
-      DateTime? nextRDate = rDateIdx < rDates.length ? rDates[rDateIdx] : null;
+      final DateTime? nextRule = hasRule ? ruleIter.current : null;
+      final DateTime? nextRDate = rDateIdx < rDates.length ? rDates[rDateIdx] : null;
 
       DateTime next;
       if (nextRule != null && nextRDate != null) {
@@ -664,7 +664,7 @@ class TideOccurrenceEngine {
     final weekMonday = isoWeek1Monday.add(Duration(days: (weekNo - 1) * 7));
 
     // Adjust to the configured week start.
-    final mondayDow = DateTime.monday;
+    const mondayDow = DateTime.monday;
     final wkstDow = weekStart.dateTimeWeekday;
     var diff = wkstDow - mondayDow;
     if (diff > 3) diff -= 7; // Keep it close to Monday.

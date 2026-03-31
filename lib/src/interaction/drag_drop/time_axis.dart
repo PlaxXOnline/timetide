@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart' show Axis;
 /// component of an [Offset] to use when converting pointer positions to
 /// time values.
 class TideTimeAxis {
+  /// Creates a [TideTimeAxis] with explicit conversion functions.
   const TideTimeAxis({
     required this.pixelToTime,
     required this.timeToPixel,

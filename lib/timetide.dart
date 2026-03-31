@@ -1,3 +1,23 @@
+/// A comprehensive Flutter scheduling calendar package.
+///
+/// Provides 13 calendar views (day, week, work week, month, schedule,
+/// timeline day/week/work week/month, multi-week, year, resource day,
+/// resource week), multi-resource scheduling, drag & drop, RFC 5545
+/// RRULE recurrence, and iCalendar export/import.
+///
+/// Widget-layer only — imports only `package:flutter/widgets.dart`.
+/// No Material or Cupertino dependency.
+///
+/// ```dart
+/// import 'package:timetide/timetide.dart';
+///
+/// TideCalendar(
+///   datasource: TideInMemoryDatasource(events: myEvents),
+///   initialView: TideView.week,
+/// )
+/// ```
+library;
+
 // Core — Models
 export 'src/core/models/conflict.dart';
 export 'src/core/models/date_time_range.dart';

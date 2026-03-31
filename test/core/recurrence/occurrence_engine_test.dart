@@ -7,7 +7,7 @@ void main() {
 
   group('DAILY frequency', () {
     test('generates daily occurrences', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily, count: 5);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily, count: 5);
       final start = DateTime(2026, 3, 1, 10, 0);
       final results = TideOccurrenceEngine.occurrences(rule, start).toList();
 
@@ -21,7 +21,7 @@ void main() {
     });
 
     test('respects INTERVAL for daily', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         interval: 3,
         count: 4,
@@ -38,7 +38,7 @@ void main() {
     });
 
     test('daily with BYDAY filter', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('daily with BYMONTH filter', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byMonth: [1, 3],
         count: 5,
@@ -84,7 +84,7 @@ void main() {
 
   group('WEEKLY frequency', () {
     test('generates weekly occurrences on same weekday', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         count: 4,
       );
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('weekly with INTERVAL=2', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
         count: 3,
@@ -117,7 +117,7 @@ void main() {
     });
 
     test('weekly with BYDAY expands to multiple days', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('weekly BYDAY with INTERVAL=2 and WKST', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [
@@ -164,7 +164,7 @@ void main() {
     });
 
     test('weekly with BYMONTH filter', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byMonth: [3],
         count: 5,
@@ -180,7 +180,7 @@ void main() {
     });
 
     test('weekly with WKST=SU changes week boundary', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.weekly,
         byDay: [
           TideByDay(weekday: TideWeekday.sunday),
@@ -206,7 +206,7 @@ void main() {
 
   group('MONTHLY frequency', () {
     test('monthly on same day-of-month', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         count: 4,
       );
@@ -222,7 +222,7 @@ void main() {
     });
 
     test('monthly with INTERVAL=3', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         interval: 3,
         count: 4,
@@ -239,7 +239,7 @@ void main() {
     });
 
     test('monthly with BYMONTHDAY', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [1, 15],
         count: 6,
@@ -258,7 +258,7 @@ void main() {
     });
 
     test('monthly with BYMONTHDAY=-1 (last day of month)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [-1],
         count: 4,
@@ -275,7 +275,7 @@ void main() {
     });
 
     test('monthly with BYDAY ordinal: 3rd Friday', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: 3)],
         count: 4,
@@ -292,7 +292,7 @@ void main() {
     });
 
     test('monthly with BYDAY ordinal: last Friday', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday, ordinal: -1)],
         count: 4,
@@ -309,7 +309,7 @@ void main() {
     });
 
     test('monthly with BYDAY without ordinal expands all weekdays', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.monday)],
         count: 5,
@@ -328,7 +328,7 @@ void main() {
     });
 
     test('monthly BYMONTHDAY=31 skips months without 31 days', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [31],
         count: 4,
@@ -346,7 +346,7 @@ void main() {
     });
 
     test('monthly with BYSETPOS=-1 and BYDAY (last Friday of month)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.friday)],
         bySetPos: [-1],
@@ -364,7 +364,7 @@ void main() {
     });
 
     test('monthly with BYSETPOS=1 and BYDAY (first Monday)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [TideByDay(weekday: TideWeekday.monday)],
         bySetPos: [1],
@@ -382,7 +382,7 @@ void main() {
     });
 
     test('monthly with BYMONTH filter', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonth: [3, 6, 9, 12],
         count: 4,
@@ -399,7 +399,7 @@ void main() {
     });
 
     test('monthly skips when day-of-month exceeds month length', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         count: 4,
       );
@@ -421,7 +421,7 @@ void main() {
 
   group('YEARLY frequency', () {
     test('yearly on same month/day', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         count: 4,
       );
@@ -437,7 +437,7 @@ void main() {
     });
 
     test('yearly with INTERVAL=2', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         interval: 2,
         count: 3,
@@ -453,7 +453,7 @@ void main() {
     });
 
     test('yearly with BYMONTH expands to multiple months', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [3, 9],
         count: 4,
@@ -470,7 +470,7 @@ void main() {
     });
 
     test('yearly with BYMONTH and BYMONTHDAY', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [1, 7],
         byMonthDay: [1, 15],
@@ -489,7 +489,7 @@ void main() {
 
     test('yearly with BYMONTH and BYDAY ordinal', () {
       // 2nd Monday of March every year.
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [3],
         byDay: [TideByDay(weekday: TideWeekday.monday, ordinal: 2)],
@@ -506,7 +506,7 @@ void main() {
     });
 
     test('yearly with BYYEARDAY', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byYearDay: [1, 100, 200],
         count: 6,
@@ -522,7 +522,7 @@ void main() {
     });
 
     test('yearly with BYWEEKNO', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byWeekNo: [1, 26],
         count: 4,
@@ -543,7 +543,7 @@ void main() {
 
   group('COUNT and UNTIL', () {
     test('COUNT limits number of occurrences', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 3,
       );
@@ -732,7 +732,7 @@ void main() {
 
   group('Range filtering', () {
     test('after parameter skips early occurrences', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 10,
       );
@@ -749,7 +749,7 @@ void main() {
     });
 
     test('before parameter limits generation', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(
         rule,
@@ -765,7 +765,7 @@ void main() {
     });
 
     test('after and before together form a window', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(
         rule,
@@ -782,7 +782,7 @@ void main() {
     });
 
     test('before is exclusive', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(
         rule,
@@ -797,7 +797,7 @@ void main() {
     });
 
     test('after is exclusive (occurrence on after date is excluded)', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 5,
       );
@@ -816,7 +816,7 @@ void main() {
 
   group('Leap year handling', () {
     test('BYMONTHDAY=29 BYMONTH=2 skips non-leap years', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [2],
         byMonthDay: [29],
@@ -834,7 +834,7 @@ void main() {
     });
 
     test('yearly on Feb 29 skips non-leap years', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         count: 3,
       );
@@ -850,7 +850,7 @@ void main() {
     });
 
     test('monthly BYMONTHDAY=29 skips February in non-leap years', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byMonthDay: [29],
         count: 5,
@@ -874,7 +874,7 @@ void main() {
 
   group('Infinite series', () {
     test('without COUNT/UNTIL uses before to stop', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(
         rule,
@@ -886,7 +886,7 @@ void main() {
     });
 
     test('without any limit yields up to defaultMaxOccurrences', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(rule, start).toList();
 
@@ -894,7 +894,7 @@ void main() {
     });
 
     test('lazy evaluation — taking only 3 from infinite does not hang', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final results = TideOccurrenceEngine.occurrences(rule, start).take(3).toList();
 
@@ -910,7 +910,7 @@ void main() {
 
   group('BYHOUR / BYMINUTE', () {
     test('BYHOUR expands to multiple hours', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byHour: [9, 14, 18],
         count: 6,
@@ -929,7 +929,7 @@ void main() {
     });
 
     test('BYMINUTE expands within each hour', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byMinute: [0, 30],
         count: 4,
@@ -946,7 +946,7 @@ void main() {
     });
 
     test('BYHOUR + BYMINUTE cross product', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         byHour: [9, 17],
         byMinute: [0, 30],
@@ -968,7 +968,7 @@ void main() {
 
   group('Boundary conditions', () {
     test('COUNT=1 returns only start date', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 1,
       );
@@ -990,7 +990,7 @@ void main() {
     });
 
     test('empty result when after is past all occurrences', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 3,
       );
@@ -1005,7 +1005,7 @@ void main() {
     });
 
     test('empty result when before is before start', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 5,
       );
@@ -1020,7 +1020,7 @@ void main() {
     });
 
     test('preserves time component of DTSTART', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.daily,
         count: 3,
       );
@@ -1035,7 +1035,7 @@ void main() {
     });
 
     test('single occurrence rule works correctly', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         count: 1,
       );
@@ -1054,9 +1054,9 @@ void main() {
         frequency: TideFrequency.weekly,
         interval: 2,
         byDay: [
-          TideByDay(weekday: TideWeekday.monday),
-          TideByDay(weekday: TideWeekday.wednesday),
-          TideByDay(weekday: TideWeekday.friday),
+          const TideByDay(weekday: TideWeekday.monday),
+          const TideByDay(weekday: TideWeekday.wednesday),
+          const TideByDay(weekday: TideWeekday.friday),
         ],
         until: DateTime(2026, 3, 20, 23, 59, 59),
       );
@@ -1076,7 +1076,7 @@ void main() {
 
     test('yearly with BYMONTH + BYDAY ordinal: Thanksgiving', () {
       // US Thanksgiving: 4th Thursday of November.
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byMonth: [11],
         byDay: [TideByDay(weekday: TideWeekday.thursday, ordinal: 4)],
@@ -1099,7 +1099,7 @@ void main() {
     });
 
     test('monthly BYSETPOS=3 + BYDAY=MO-FR: 3rd weekday of month', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.monthly,
         byDay: [
           TideByDay(weekday: TideWeekday.monday),
@@ -1165,7 +1165,7 @@ void main() {
 
   group('BYYEARDAY negative values', () {
     test('BYYEARDAY=-1 is last day of year', () {
-      final rule = TideRecurrenceRule(
+      const rule = TideRecurrenceRule(
         frequency: TideFrequency.yearly,
         byYearDay: [-1],
         count: 3,
@@ -1185,7 +1185,7 @@ void main() {
 
   group('Lazy evaluation', () {
     test('can take N from infinite series without materializing all', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
 
       // Just calling .take(5) should not hang or cause memory issues.
@@ -1194,7 +1194,7 @@ void main() {
     });
 
     test('iterator can be paused and resumed', () {
-      final rule = TideRecurrenceRule(frequency: TideFrequency.daily);
+      const rule = TideRecurrenceRule(frequency: TideFrequency.daily);
       final start = DateTime(2026, 1, 1);
       final iter = TideOccurrenceEngine.occurrences(
         rule,
