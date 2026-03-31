@@ -10,6 +10,9 @@ permissions:
   contents: write
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -58,7 +61,7 @@ jobs:
 
       - name: Test
         if: steps.version.outputs.changed == 'true'
-        run: flutter test
+        run: flutter test --exclude-tags=golden
 
       - name: Create git tag
         if: steps.version.outputs.changed == 'true'

@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Fix repository and issue tracker URLs in pubspec.yaml.
+
 ## 1.0.0
 
 Initial stable release of timetide.
