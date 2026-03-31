@@ -1,0 +1,40 @@
+name: Auto-tag on version bump
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pubspec.yaml'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Detect version change
+        id: version
+        run: |
+          NEW_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          OLD_VERSION=$(git show HEAD~1:pubspec.yaml | grep '^version:' | awk '{print $2}')
+          echo "new=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: $OLD_VERSION → $NEW_VERSION"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged ($NEW_VERSION), skipping."
+          fi
+
+      - name: Create and push tag
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.new }}"
+          git tag "$TAG"
+          git push origin "$TAG"
