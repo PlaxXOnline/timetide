@@ -1,8 +1,16 @@
-# timetide
+<p align="center">
+  <img src="docs/brand/logo-wordmark-light.png" alt="timetide" width="360" />
+</p>
 
-A comprehensive Flutter scheduling calendar package with 13 views, companion scheduling widgets, multi-resource scheduling, fully functional drag & drop, RRULE recurrence, and iCalendar export/import.
+<p align="center">
+  A comprehensive Flutter scheduling calendar — 13 views, companion booking widgets, multi-resource scheduling, drag & drop, RRULE recurrence, iCalendar import/export.
+  <br/>
+  <strong>Widget-layer only.</strong> No Material or Cupertino dependency.
+</p>
 
-**Widget-layer only** — imports only `package:flutter/widgets.dart`. No Material or Cupertino dependency. You control the look and feel.
+<p align="center">
+  <img src="docs/screenshots/hero-light.png" alt="timetide weekly schedule" width="100%" />
+</p>
 
 ## Installation
 
@@ -10,7 +18,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  timetide: ^1.0.0
+  timetide: ^1.1.1
 ```
 
 Then run:
@@ -41,6 +49,25 @@ TideCalendar(
 )
 ```
 
+## Theming · light & dark out of the box
+
+`TideThemeData` exposes 60+ visual properties. Two examples below — the same week, two different themes:
+
+<p align="center">
+  <img src="docs/screenshots/theme-compare.png" alt="timetide light and dark themes side by side" width="100%" />
+</p>
+
+```dart
+TideTheme(
+  data: TideThemeData(
+    primaryColor: Color(0xFF8B5CF6),
+    eventBorderRadius: BorderRadius.circular(8),
+    backgroundColor: Color(0xFF0E1014),
+  ),
+  child: TideCalendar(datasource: datasource),
+)
+```
+
 ## Features
 
 ### 13 Calendar Views
@@ -61,9 +88,17 @@ TideCalendar(
 | Resource Day | `TideResourceDayView` | Vertical time axis with side-by-side resource columns |
 | Resource Week | `TideResourceWeekView` | Week with day sub-columns per resource, two-level headers |
 
+<p align="center">
+  <img src="docs/screenshots/month-light.png" alt="timetide month view" width="100%" />
+</p>
+
 ### Multi-Resource Scheduling
 
 Assign events to rooms, people, or equipment with `TideResource`. Timeline views display resources as rows with synchronized scrolling. Resource Day and Resource Week views place each resource in its own column, making it easy to compare schedules at a glance.
+
+<p align="center">
+  <img src="docs/screenshots/resource-day-light.png" alt="timetide resource day view with three stylists" width="100%" />
+</p>
 
 #### Resource Views
 
@@ -119,6 +154,10 @@ final desc = rule.describe(locale: 'en'); // "Every week on Monday, Wednesday, F
 
 `TideRecurrenceEditor` provides a fully custom RRULE builder widget with live occurrence preview — no Material widgets required.
 
+<p align="center">
+  <img src="docs/screenshots/recurrence-light.png" alt="timetide recurrence editor" width="100%" />
+</p>
+
 ### iCalendar Export/Import
 
 Export events to `.ics` format and import iCalendar files back into the datasource. Full RFC 5545 compliance.
@@ -143,7 +182,13 @@ Built-in English and German support via `TideLocalizations`. Add custom locales 
 
 ### Responsive Layout
 
-`TideAdaptiveLayout` + `TideBreakpoints` automatically switch between mobile, tablet, and desktop layouts.
+`TideAdaptiveLayout` + `TideBreakpoints` automatically switch between mobile, tablet, and desktop layouts. The same widgets adapt seamlessly:
+
+<p align="center">
+  <img src="docs/screenshots/mobile-day-light.png" alt="timetide mobile day view" width="32%" />
+  <img src="docs/screenshots/mobile-day-dark.png" alt="timetide mobile day view dark" width="32%" />
+  <img src="docs/screenshots/mobile-slots-light.png" alt="timetide mobile slot picker" width="32%" />
+</p>
 
 ### Context Menu & Tooltip
 
@@ -157,6 +202,10 @@ Scheduling companion widgets for booking flows and shift planning — designed t
 
 Horizontal scrollable date picker strip:
 
+<p align="center">
+  <img src="docs/screenshots/date-strip-light.png" alt="timetide date strip" width="100%" />
+</p>
+
 ```dart
 TideDateStrip(
   selectedDate: DateTime.now(),
@@ -169,6 +218,10 @@ TideDateStrip(
 #### TideSlotPicker
 
 Time slot selection with optional resource grouping:
+
+<p align="center">
+  <img src="docs/screenshots/slot-picker-light.png" alt="timetide slot picker" width="100%" />
+</p>
 
 ```dart
 TideSlotPicker(
@@ -184,6 +237,10 @@ TideSlotPicker(
 #### TideTemplateEditor
 
 Weekly shift/schedule template editor with drag-to-create and resize:
+
+<p align="center">
+  <img src="docs/screenshots/template-editor-light.png" alt="timetide template editor" width="100%" />
+</p>
 
 ```dart
 TideTemplateEditor(
@@ -235,6 +292,16 @@ TideTemplateEditor(
 | `TideScrollSync` | Shared scroll synchronization utility |
 
 All public types use the `Tide` prefix for discoverability.
+
+## Brand assets
+
+Logo, wordmark, and a vector source (SVG) live in [`docs/brand/`](docs/brand/) — feel free to use them in articles, integrations, or app stores that bundle timetide.
+
+| File | Use |
+|------|-----|
+| `logo-square.svg` | Vector logo, scales to any size |
+| `logo-square-light.png` / `logo-square-dark.png` | 512×512 raster, light / dark backgrounds |
+| `logo-wordmark-light.png` / `logo-wordmark-dark.png` | Logo + wordmark, 1024×320 |
 
 ## License
 

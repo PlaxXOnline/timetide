@@ -1,3 +1,11 @@
+## 1.1.1
+
+### Documentation
+- Rewrote README with hero banner, light/dark theme comparison, mobile previews, and per-feature screenshots.
+- Added brand assets in `docs/brand/`: SVG vector logo plus light/dark PNG variants for the square mark and wordmark.
+- Added 19 product screenshots in `docs/screenshots/` covering the calendar views, companion widgets, and the recurrence editor.
+- Adjusted `.gitignore` and `.pubignore` so README assets ship with the package while internal docs stay private.
+
 ## 1.1.0
 
 ### Companion Widgets

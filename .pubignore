@@ -12,8 +12,10 @@ build/
 # OS files
 .DS_Store
 
-# Development files
-docs/
+# Development files (keep README assets in docs/brand and docs/screenshots).
+docs/*
+!docs/brand/
+!docs/screenshots/
 plans/
 .claude/
 CLAUDE.md

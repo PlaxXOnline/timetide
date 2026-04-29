@@ -34,7 +34,10 @@ migrate_working_dir/
 test/golden/failures/
 test/golden/goldens/
 
-docs/
+# Ignore docs/ contents but keep README assets tracked.
+docs/*
+!docs/brand/
+!docs/screenshots/
 plans/
 .claude/
 CLAUDE.md
