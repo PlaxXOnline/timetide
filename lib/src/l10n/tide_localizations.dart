@@ -69,6 +69,44 @@ class TideLocalizations {
   /// Display name for the work-week view.
   final String workWeek;
 
+  // ─── Companion Widget Strings ────────────────────────
+
+  /// Shown when no time slots are available.
+  final String noSlotsAvailable;
+
+  /// Label for the date selection action.
+  final String selectDate;
+
+  /// Label for the time selection action.
+  final String selectTime;
+
+  /// Abbreviated label for Monday.
+  final String monday;
+
+  /// Abbreviated label for Tuesday.
+  final String tuesday;
+
+  /// Abbreviated label for Wednesday.
+  final String wednesday;
+
+  /// Abbreviated label for Thursday.
+  final String thursday;
+
+  /// Abbreviated label for Friday.
+  final String friday;
+
+  /// Abbreviated label for Saturday.
+  final String saturday;
+
+  /// Abbreviated label for Sunday.
+  final String sunday;
+
+  /// Display name for the template/schedule editor.
+  final String templateEditor;
+
+  /// Label for break periods.
+  final String breakLabel;
+
   /// Creates a [TideLocalizations] with the given strings.
   const TideLocalizations({
     required this.today,
@@ -91,6 +129,18 @@ class TideLocalizations {
     required this.multiWeek,
     required this.year,
     required this.workWeek,
+    required this.noSlotsAvailable,
+    required this.selectDate,
+    required this.selectTime,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
+    required this.templateEditor,
+    required this.breakLabel,
   });
 
   /// English localizations.
@@ -116,6 +166,18 @@ class TideLocalizations {
       multiWeek: 'Multi-week',
       year: 'Year',
       workWeek: 'Work week',
+      noSlotsAvailable: 'No slots available',
+      selectDate: 'Select date',
+      selectTime: 'Select time',
+      monday: 'Mon',
+      tuesday: 'Tue',
+      wednesday: 'Wed',
+      thursday: 'Thu',
+      friday: 'Fri',
+      saturday: 'Sat',
+      sunday: 'Sun',
+      templateEditor: 'Schedule Editor',
+      breakLabel: 'Break',
     );
   }
 
@@ -142,7 +204,34 @@ class TideLocalizations {
       multiWeek: 'Mehrere Wochen',
       year: 'Jahr',
       workWeek: 'Arbeitswoche',
+      noSlotsAvailable: 'Keine Termine verfügbar',
+      selectDate: 'Datum wählen',
+      selectTime: 'Uhrzeit wählen',
+      monday: 'Mo',
+      tuesday: 'Di',
+      wednesday: 'Mi',
+      thursday: 'Do',
+      friday: 'Fr',
+      saturday: 'Sa',
+      sunday: 'So',
+      templateEditor: 'Wochenplan-Editor',
+      breakLabel: 'Pause',
     );
+  }
+
+  /// Returns the abbreviated weekday name for the given ISO 8601 weekday
+  /// (1 = Monday, 7 = Sunday).
+  String weekdayAbbr(int isoWeekday) {
+    return switch (isoWeekday) {
+      1 => monday,
+      2 => tuesday,
+      3 => wednesday,
+      4 => thursday,
+      5 => friday,
+      6 => saturday,
+      7 => sunday,
+      _ => '',
+    };
   }
 
   /// Formats the [moreEvents] template by replacing `{count}` with [count].
@@ -173,32 +262,60 @@ class TideLocalizations {
         timelineMonth == other.timelineMonth &&
         multiWeek == other.multiWeek &&
         year == other.year &&
-        workWeek == other.workWeek;
+        workWeek == other.workWeek &&
+        noSlotsAvailable == other.noSlotsAvailable &&
+        selectDate == other.selectDate &&
+        selectTime == other.selectTime &&
+        monday == other.monday &&
+        tuesday == other.tuesday &&
+        wednesday == other.wednesday &&
+        thursday == other.thursday &&
+        friday == other.friday &&
+        saturday == other.saturday &&
+        sunday == other.sunday &&
+        templateEditor == other.templateEditor &&
+        breakLabel == other.breakLabel;
   }
 
   @override
   int get hashCode {
     return Object.hash(
-      today,
-      monthView,
-      weekView,
-      dayView,
-      scheduleView,
-      noEvents,
-      allDay,
-      moreEvents,
-      newEvent,
-      deleteEvent,
-      editEvent,
-      editSeries,
-      editOccurrence,
-      editThisAndFollowing,
-      timelineDay,
-      timelineWeek,
-      timelineMonth,
-      multiWeek,
-      year,
-      workWeek,
+      Object.hash(
+        today,
+        monthView,
+        weekView,
+        dayView,
+        scheduleView,
+        noEvents,
+        allDay,
+        moreEvents,
+        newEvent,
+        deleteEvent,
+        editEvent,
+        editSeries,
+        editOccurrence,
+        editThisAndFollowing,
+        timelineDay,
+        timelineWeek,
+        timelineMonth,
+        multiWeek,
+        year,
+        workWeek,
+      ),
+      Object.hash(
+        noSlotsAvailable,
+        selectDate,
+        selectTime,
+        monday,
+        tuesday,
+        wednesday,
+        thursday,
+        friday,
+        saturday,
+        sunday,
+        templateEditor,
+        breakLabel,
+      ),
     );
   }
 

@@ -1,6 +1,6 @@
 # timetide
 
-A comprehensive Flutter scheduling calendar package with 13 views, multi-resource scheduling, fully functional drag & drop, RRULE recurrence, and iCalendar export/import.
+A comprehensive Flutter scheduling calendar package with 13 views, companion scheduling widgets, multi-resource scheduling, fully functional drag & drop, RRULE recurrence, and iCalendar export/import.
 
 **Widget-layer only** — imports only `package:flutter/widgets.dart`. No Material or Cupertino dependency. You control the look and feel.
 
@@ -125,7 +125,7 @@ Export events to `.ics` format and import iCalendar files back into the datasour
 
 ### Custom Theming
 
-`TideThemeData` provides 40+ properties for colors, typography, spacing, and more. Inject via `TideTheme` (InheritedWidget):
+`TideThemeData` provides 60+ properties for colors, typography, spacing, and more. Inject via `TideTheme` (InheritedWidget):
 
 ```dart
 TideTheme(
@@ -148,6 +148,54 @@ Built-in English and German support via `TideLocalizations`. Add custom locales 
 ### Context Menu & Tooltip
 
 Design-agnostic `TideContextMenu` (right-click/long-press) and `TideTooltip` (hover/long-press) — all custom, no Material.
+
+### Companion Widgets
+
+Scheduling companion widgets for booking flows and shift planning — designed to work alongside or independently of the main calendar:
+
+#### TideDateStrip
+
+Horizontal scrollable date picker strip:
+
+```dart
+TideDateStrip(
+  selectedDate: DateTime.now(),
+  onDateSelected: (date) => print('Selected: $date'),
+  dayCount: 14,
+  showTodayIndicator: true,
+)
+```
+
+#### TideSlotPicker
+
+Time slot selection with optional resource grouping:
+
+```dart
+TideSlotPicker(
+  slots: [
+    TideSlot(id: '1', startTime: DateTime(2026, 4, 12, 9, 0), endTime: DateTime(2026, 4, 12, 9, 30), resourceName: 'Alice'),
+    TideSlot(id: '2', startTime: DateTime(2026, 4, 12, 10, 0), endTime: DateTime(2026, 4, 12, 10, 30), resourceName: 'Bob'),
+  ],
+  onSlotSelected: (slot) => print('Selected: ${slot.id}'),
+  groupByResource: true,
+)
+```
+
+#### TideTemplateEditor
+
+Weekly shift/schedule template editor with drag-to-create and resize:
+
+```dart
+TideTemplateEditor(
+  resources: myResources,
+  slots: myTemplateSlots,
+  onSlotCreated: (slot) => print('Created: ${slot.id}'),
+  onSlotUpdated: (slot) => print('Updated: ${slot.id}'),
+  onSlotDeleted: (slot) => print('Deleted: ${slot.id}'),
+  startHour: 7,
+  endHour: 21,
+)
+```
 
 ## Architecture
 
@@ -172,6 +220,12 @@ Design-agnostic `TideContextMenu` (right-click/long-press) and `TideTooltip` (ho
 | `TideRecurrenceEditor` | Visual RRULE builder |
 | `TideContextMenu` | Overlay context menu |
 | `TideTooltip` | Overlay tooltip |
+| `TideDateStrip` | Horizontal date picker strip |
+| `TideSlotPicker` | Time slot selection with grouping |
+| `TideTemplateEditor` | Weekly shift/schedule template editor |
+| `TideSlot` | Time slot data model |
+| `TideTemplateSlot` | Template slot data model |
+| `TideTimeOfDay` | Widget-layer time-of-day |
 | `TideDragHandler` | Core drag-and-drop orchestrator |
 | `TideResizeHandler` | Event edge resize handler |
 | `TideSnapEngine` | Time-grid snap logic |

@@ -127,6 +127,18 @@ void main() {
         multiWeek: 'Multi-semana',
         year: 'Ano',
         workWeek: 'Semana laboral',
+        noSlotsAvailable: 'Sin horarios disponibles',
+        selectDate: 'Seleccionar fecha',
+        selectTime: 'Seleccionar hora',
+        monday: 'Lun',
+        tuesday: 'Mar',
+        wednesday: 'Mie',
+        thursday: 'Jue',
+        friday: 'Vie',
+        saturday: 'Sab',
+        sunday: 'Dom',
+        templateEditor: 'Editor de horarios',
+        breakLabel: 'Descanso',
       );
       expect(custom.today, 'Hoy');
       expect(custom.monthView, 'Mes');

@@ -139,6 +139,69 @@ class TideThemeData {
   /// Width of the keyboard-focus indicator ring.
   final double focusIndicatorWidth;
 
+  // ─── Date Strip ──────────────────────────────────────
+
+  /// Height of the horizontal date strip.
+  final double dateStripHeight;
+
+  /// Background color for the selected date chip.
+  final Color dateStripSelectedColor;
+
+  /// Color of the today indicator dot.
+  final Color dateStripTodayIndicatorColor;
+
+  /// Color for disabled (out-of-range) dates.
+  final Color dateStripDisabledColor;
+
+  /// Text style for the date number in the strip.
+  final TextStyle dateStripTextStyle;
+
+  /// Text style for the weekday abbreviation in the strip.
+  final TextStyle dateStripWeekdayTextStyle;
+
+  // ─── Slot Picker ─────────────────────────────────────
+
+  /// Background color of an unselected slot chip.
+  final Color slotPickerChipColor;
+
+  /// Background color of a selected slot chip.
+  final Color slotPickerSelectedColor;
+
+  /// Text style for slot chip labels.
+  final TextStyle slotPickerTextStyle;
+
+  /// Text style for resource/group headers in the slot picker.
+  final TextStyle slotPickerHeaderTextStyle;
+
+  /// Border radius of slot chips.
+  final BorderRadius slotPickerChipBorderRadius;
+
+  /// Spacing between slot chips.
+  final double slotPickerSpacing;
+
+  // ─── Template Editor ─────────────────────────────────
+
+  /// Height of one hour row in the template editor.
+  final double templateEditorHourHeight;
+
+  /// Width of each day column in the template editor.
+  final double templateEditorDayColumnWidth;
+
+  /// Color of grid lines in the template editor.
+  final Color templateEditorGridLineColor;
+
+  /// Color of the break pattern overlay.
+  final Color templateEditorBreakPatternColor;
+
+  /// Spacing of the break pattern hatching.
+  final double templateEditorBreakPatternSpacing;
+
+  /// Border radius of template slots.
+  final BorderRadius templateEditorSlotBorderRadius;
+
+  /// Text style for day column headers in the template editor.
+  final TextStyle templateEditorHeaderTextStyle;
+
   /// Creates a [TideThemeData] with sensible defaults.
   const TideThemeData({
     // Global
@@ -209,6 +272,50 @@ class TideThemeData {
     // Accessibility
     this.focusIndicatorColor = const Color(0xFF000000),
     this.focusIndicatorWidth = 2.0,
+    // Date Strip
+    this.dateStripHeight = 72.0,
+    this.dateStripSelectedColor = const Color(0xFF2196F3),
+    this.dateStripTodayIndicatorColor = const Color(0xFF2196F3),
+    this.dateStripDisabledColor = const Color(0xFFBDBDBD),
+    this.dateStripTextStyle = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF212121),
+    ),
+    this.dateStripWeekdayTextStyle = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF757575),
+    ),
+    // Slot Picker
+    this.slotPickerChipColor = const Color(0xFFF5F5F5),
+    this.slotPickerSelectedColor = const Color(0xFF2196F3),
+    this.slotPickerTextStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: Color(0xFF212121),
+    ),
+    this.slotPickerHeaderTextStyle = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF424242),
+    ),
+    this.slotPickerChipBorderRadius =
+        const BorderRadius.all(Radius.circular(8)),
+    this.slotPickerSpacing = 8.0,
+    // Template Editor
+    this.templateEditorHourHeight = 60.0,
+    this.templateEditorDayColumnWidth = 120.0,
+    this.templateEditorGridLineColor = const Color(0xFFE0E0E0),
+    this.templateEditorBreakPatternColor = const Color(0x33000000),
+    this.templateEditorBreakPatternSpacing = 8.0,
+    this.templateEditorSlotBorderRadius =
+        const BorderRadius.all(Radius.circular(4)),
+    this.templateEditorHeaderTextStyle = const TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF424242),
+    ),
   });
 
   /// Returns a copy of this theme with the given fields replaced.
@@ -260,6 +367,28 @@ class TideThemeData {
     // Accessibility
     Color? focusIndicatorColor,
     double? focusIndicatorWidth,
+    // Date Strip
+    double? dateStripHeight,
+    Color? dateStripSelectedColor,
+    Color? dateStripTodayIndicatorColor,
+    Color? dateStripDisabledColor,
+    TextStyle? dateStripTextStyle,
+    TextStyle? dateStripWeekdayTextStyle,
+    // Slot Picker
+    Color? slotPickerChipColor,
+    Color? slotPickerSelectedColor,
+    TextStyle? slotPickerTextStyle,
+    TextStyle? slotPickerHeaderTextStyle,
+    BorderRadius? slotPickerChipBorderRadius,
+    double? slotPickerSpacing,
+    // Template Editor
+    double? templateEditorHourHeight,
+    double? templateEditorDayColumnWidth,
+    Color? templateEditorGridLineColor,
+    Color? templateEditorBreakPatternColor,
+    double? templateEditorBreakPatternSpacing,
+    BorderRadius? templateEditorSlotBorderRadius,
+    TextStyle? templateEditorHeaderTextStyle,
   }) {
     return TideThemeData(
       // Global
@@ -312,6 +441,42 @@ class TideThemeData {
       // Accessibility
       focusIndicatorColor: focusIndicatorColor ?? this.focusIndicatorColor,
       focusIndicatorWidth: focusIndicatorWidth ?? this.focusIndicatorWidth,
+      // Date Strip
+      dateStripHeight: dateStripHeight ?? this.dateStripHeight,
+      dateStripSelectedColor:
+          dateStripSelectedColor ?? this.dateStripSelectedColor,
+      dateStripTodayIndicatorColor:
+          dateStripTodayIndicatorColor ?? this.dateStripTodayIndicatorColor,
+      dateStripDisabledColor:
+          dateStripDisabledColor ?? this.dateStripDisabledColor,
+      dateStripTextStyle: dateStripTextStyle ?? this.dateStripTextStyle,
+      dateStripWeekdayTextStyle:
+          dateStripWeekdayTextStyle ?? this.dateStripWeekdayTextStyle,
+      // Slot Picker
+      slotPickerChipColor: slotPickerChipColor ?? this.slotPickerChipColor,
+      slotPickerSelectedColor:
+          slotPickerSelectedColor ?? this.slotPickerSelectedColor,
+      slotPickerTextStyle: slotPickerTextStyle ?? this.slotPickerTextStyle,
+      slotPickerHeaderTextStyle:
+          slotPickerHeaderTextStyle ?? this.slotPickerHeaderTextStyle,
+      slotPickerChipBorderRadius:
+          slotPickerChipBorderRadius ?? this.slotPickerChipBorderRadius,
+      slotPickerSpacing: slotPickerSpacing ?? this.slotPickerSpacing,
+      // Template Editor
+      templateEditorHourHeight:
+          templateEditorHourHeight ?? this.templateEditorHourHeight,
+      templateEditorDayColumnWidth:
+          templateEditorDayColumnWidth ?? this.templateEditorDayColumnWidth,
+      templateEditorGridLineColor:
+          templateEditorGridLineColor ?? this.templateEditorGridLineColor,
+      templateEditorBreakPatternColor: templateEditorBreakPatternColor ??
+          this.templateEditorBreakPatternColor,
+      templateEditorBreakPatternSpacing: templateEditorBreakPatternSpacing ??
+          this.templateEditorBreakPatternSpacing,
+      templateEditorSlotBorderRadius: templateEditorSlotBorderRadius ??
+          this.templateEditorSlotBorderRadius,
+      templateEditorHeaderTextStyle: templateEditorHeaderTextStyle ??
+          this.templateEditorHeaderTextStyle,
     );
   }
 
@@ -391,6 +556,54 @@ class TideThemeData {
           Color.lerp(a.focusIndicatorColor, b.focusIndicatorColor, t)!,
       focusIndicatorWidth:
           lerpDouble(a.focusIndicatorWidth, b.focusIndicatorWidth, t)!,
+      // Date Strip
+      dateStripHeight: lerpDouble(a.dateStripHeight, b.dateStripHeight, t)!,
+      dateStripSelectedColor:
+          Color.lerp(a.dateStripSelectedColor, b.dateStripSelectedColor, t)!,
+      dateStripTodayIndicatorColor: Color.lerp(
+          a.dateStripTodayIndicatorColor, b.dateStripTodayIndicatorColor, t)!,
+      dateStripDisabledColor:
+          Color.lerp(a.dateStripDisabledColor, b.dateStripDisabledColor, t)!,
+      dateStripTextStyle:
+          TextStyle.lerp(a.dateStripTextStyle, b.dateStripTextStyle, t)!,
+      dateStripWeekdayTextStyle: TextStyle.lerp(
+          a.dateStripWeekdayTextStyle, b.dateStripWeekdayTextStyle, t)!,
+      // Slot Picker
+      slotPickerChipColor:
+          Color.lerp(a.slotPickerChipColor, b.slotPickerChipColor, t)!,
+      slotPickerSelectedColor: Color.lerp(
+          a.slotPickerSelectedColor, b.slotPickerSelectedColor, t)!,
+      slotPickerTextStyle:
+          TextStyle.lerp(a.slotPickerTextStyle, b.slotPickerTextStyle, t)!,
+      slotPickerHeaderTextStyle: TextStyle.lerp(
+          a.slotPickerHeaderTextStyle, b.slotPickerHeaderTextStyle, t)!,
+      slotPickerChipBorderRadius: BorderRadius.lerp(
+          a.slotPickerChipBorderRadius, b.slotPickerChipBorderRadius, t)!,
+      slotPickerSpacing:
+          lerpDouble(a.slotPickerSpacing, b.slotPickerSpacing, t)!,
+      // Template Editor
+      templateEditorHourHeight: lerpDouble(
+          a.templateEditorHourHeight, b.templateEditorHourHeight, t)!,
+      templateEditorDayColumnWidth: lerpDouble(
+          a.templateEditorDayColumnWidth, b.templateEditorDayColumnWidth, t)!,
+      templateEditorGridLineColor: Color.lerp(
+          a.templateEditorGridLineColor, b.templateEditorGridLineColor, t)!,
+      templateEditorBreakPatternColor: Color.lerp(
+          a.templateEditorBreakPatternColor,
+          b.templateEditorBreakPatternColor,
+          t)!,
+      templateEditorBreakPatternSpacing: lerpDouble(
+          a.templateEditorBreakPatternSpacing,
+          b.templateEditorBreakPatternSpacing,
+          t)!,
+      templateEditorSlotBorderRadius: BorderRadius.lerp(
+          a.templateEditorSlotBorderRadius,
+          b.templateEditorSlotBorderRadius,
+          t)!,
+      templateEditorHeaderTextStyle: TextStyle.lerp(
+          a.templateEditorHeaderTextStyle,
+          b.templateEditorHeaderTextStyle,
+          t)!,
     );
   }
 
@@ -434,7 +647,29 @@ class TideThemeData {
         scrollbarThickness == other.scrollbarThickness &&
         scrollbarRadius == other.scrollbarRadius &&
         focusIndicatorColor == other.focusIndicatorColor &&
-        focusIndicatorWidth == other.focusIndicatorWidth;
+        focusIndicatorWidth == other.focusIndicatorWidth &&
+        dateStripHeight == other.dateStripHeight &&
+        dateStripSelectedColor == other.dateStripSelectedColor &&
+        dateStripTodayIndicatorColor == other.dateStripTodayIndicatorColor &&
+        dateStripDisabledColor == other.dateStripDisabledColor &&
+        dateStripTextStyle == other.dateStripTextStyle &&
+        dateStripWeekdayTextStyle == other.dateStripWeekdayTextStyle &&
+        slotPickerChipColor == other.slotPickerChipColor &&
+        slotPickerSelectedColor == other.slotPickerSelectedColor &&
+        slotPickerTextStyle == other.slotPickerTextStyle &&
+        slotPickerHeaderTextStyle == other.slotPickerHeaderTextStyle &&
+        slotPickerChipBorderRadius == other.slotPickerChipBorderRadius &&
+        slotPickerSpacing == other.slotPickerSpacing &&
+        templateEditorHourHeight == other.templateEditorHourHeight &&
+        templateEditorDayColumnWidth == other.templateEditorDayColumnWidth &&
+        templateEditorGridLineColor == other.templateEditorGridLineColor &&
+        templateEditorBreakPatternColor ==
+            other.templateEditorBreakPatternColor &&
+        templateEditorBreakPatternSpacing ==
+            other.templateEditorBreakPatternSpacing &&
+        templateEditorSlotBorderRadius ==
+            other.templateEditorSlotBorderRadius &&
+        templateEditorHeaderTextStyle == other.templateEditorHeaderTextStyle;
   }
 
   @override
@@ -480,6 +715,27 @@ class TideThemeData {
         scrollbarRadius,
         focusIndicatorColor,
         focusIndicatorWidth,
+      ),
+      Object.hash(
+        dateStripHeight,
+        dateStripSelectedColor,
+        dateStripTodayIndicatorColor,
+        dateStripDisabledColor,
+        dateStripTextStyle,
+        dateStripWeekdayTextStyle,
+        slotPickerChipColor,
+        slotPickerSelectedColor,
+        slotPickerTextStyle,
+        slotPickerHeaderTextStyle,
+        slotPickerChipBorderRadius,
+        slotPickerSpacing,
+        templateEditorHourHeight,
+        templateEditorDayColumnWidth,
+        templateEditorGridLineColor,
+        templateEditorBreakPatternColor,
+        templateEditorBreakPatternSpacing,
+        templateEditorSlotBorderRadius,
+        templateEditorHeaderTextStyle,
       ),
     );
   }

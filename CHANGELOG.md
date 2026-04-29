@@ -1,3 +1,22 @@
+## 1.1.0
+
+### Companion Widgets
+- `TideDateStrip` — horizontal scrollable date picker strip with selection, today indicator, and disabled dates
+- `TideSlotPicker` — time slot selection widget with optional resource grouping, loading, and empty states
+- `TideTemplateEditor` — weekly template editor for shift/schedule planning with drag-to-create, resize, break overlays, and resource legend
+
+### New Models
+- `TideSlot` — bookable time slot data model for `TideSlotPicker`
+- `TideTemplateSlot` — weekly template slot data model for `TideTemplateEditor`
+- `TideTimeOfDay` — lightweight time-of-day class (widget-layer alternative to Material's `TimeOfDay`)
+
+### Theme
+- Added 21 new `TideThemeData` properties for companion widget styling (date strip, slot picker, template editor sections)
+
+### Localization
+- Added 13 new `TideLocalizations` strings for companion widgets (weekday abbreviations, labels)
+- Added `TideLocalizations.weekdayAbbr(int isoWeekday)` helper method
+
 ## 1.0.3
 
 - Fix automated publishing with tag-based OIDC workflow.

@@ -25,6 +25,8 @@ export 'src/core/models/drag_details.dart';
 export 'src/core/models/event.dart';
 export 'src/core/models/event_changes.dart';
 export 'src/core/models/resource.dart';
+export 'src/core/models/slot.dart';
+export 'src/core/models/template_slot.dart';
 export 'src/core/models/time_region.dart';
 export 'src/core/models/view.dart';
 
@@ -116,8 +118,14 @@ export 'src/interaction/undo/undo_manager.dart';
 // Localization
 export 'src/l10n/tide_localizations.dart';
 
+// Widgets — Date Strip
+export 'src/widgets/date_strip/tide_date_strip.dart';
+
 // Widgets — Main
 export 'src/widgets/tide_calendar.dart';
+
+// Widgets — Slot Picker
+export 'src/widgets/slot_picker/tide_slot_picker.dart';
 
 // Widgets — Headers
 export 'src/widgets/header/calendar_header.dart';
@@ -144,6 +152,10 @@ export 'src/widgets/tooltip/tide_tooltip.dart';
 
 // Widgets — Recurrence Editor
 export 'src/widgets/recurrence_editor/recurrence_editor.dart';
+
+// Widgets — Template Editor
+export 'src/widgets/template_editor/tide_template_editor.dart';
+export 'src/widgets/template_editor/template_slot_painter.dart';
 
 // Export / Import
 export 'src/core/export/ical_export.dart';
