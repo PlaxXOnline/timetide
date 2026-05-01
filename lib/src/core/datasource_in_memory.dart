@@ -66,25 +66,29 @@ class TideInMemoryDatasource extends TideDatasource {
   // ─── Event Mutations ─────────────────────────────────────
 
   /// Adds a single event and emits an [EventsAdded] notification.
-  void addEvent(TideEvent event) {
+  @override
+  Future<void> addEvent(TideEvent event) async {
     _assertNotDisposed();
     _events.add(event);
     _changesController.add(EventsAdded([event]));
   }
 
-  /// Adds multiple events at once and emits an [EventsAdded] notification.
-  void addEvents(List<TideEvent> events) {
+  /// Adds multiple events at once and emits a single [EventsAdded]
+  /// notification for the whole batch.
+  @override
+  Future<void> addEvents(List<TideEvent> events) async {
     _assertNotDisposed();
     if (events.isEmpty) return;
     _events.addAll(events);
-    _changesController.add(EventsAdded(events));
+    _changesController.add(EventsAdded(List<TideEvent>.of(events)));
   }
 
   /// Updates an existing event (matched by [TideEvent.id]) and emits an
   /// [EventsUpdated] notification.
   ///
   /// Does nothing if no event with the given ID exists.
-  void updateEvent(TideEvent event) {
+  @override
+  Future<void> updateEvent(TideEvent event) async {
     _assertNotDisposed();
     final index = _events.indexWhere((e) => e.id == event.id);
     if (index == -1) return;
@@ -92,16 +96,55 @@ class TideInMemoryDatasource extends TideDatasource {
     _changesController.add(EventsUpdated([event]));
   }
 
+  /// Updates multiple existing events at once and emits a single
+  /// [EventsUpdated] notification containing all events that were
+  /// actually present in the datasource.
+  ///
+  /// Events whose ID is not found are silently skipped.
+  @override
+  Future<void> updateEvents(List<TideEvent> events) async {
+    _assertNotDisposed();
+    if (events.isEmpty) return;
+    final updated = <TideEvent>[];
+    for (final event in events) {
+      final index = _events.indexWhere((e) => e.id == event.id);
+      if (index == -1) continue;
+      _events[index] = event;
+      updated.add(event);
+    }
+    if (updated.isEmpty) return;
+    _changesController.add(EventsUpdated(updated));
+  }
+
   /// Removes the event with the given [eventId] and emits an
   /// [EventsRemoved] notification.
   ///
   /// Does nothing if no event with the given ID exists.
-  void removeEvent(String eventId) {
+  @override
+  Future<void> removeEvent(String eventId) async {
     _assertNotDisposed();
     final removed = _events.where((e) => e.id == eventId).toList();
     if (removed.isEmpty) return;
     _events.removeWhere((e) => e.id == eventId);
     _changesController.add(EventsRemoved([eventId]));
+  }
+
+  /// Removes multiple events at once, identified by their IDs, and
+  /// emits a single [EventsRemoved] notification for the IDs that were
+  /// actually present in the datasource.
+  ///
+  /// IDs that don't match any event are silently skipped.
+  @override
+  Future<void> removeEvents(List<String> eventIds) async {
+    _assertNotDisposed();
+    if (eventIds.isEmpty) return;
+    final existing = eventIds
+        .where((id) => _events.any((e) => e.id == id))
+        .toList(growable: false);
+    if (existing.isEmpty) return;
+    final idSet = existing.toSet();
+    _events.removeWhere((e) => idSet.contains(e.id));
+    _changesController.add(EventsRemoved(existing));
   }
 
   // ─── Resource Mutations ──────────────────────────────────

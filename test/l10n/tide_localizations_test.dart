@@ -26,6 +26,12 @@ void main() {
     test('multiWeek', () => expect(en.multiWeek, 'Multi-week'));
     test('year', () => expect(en.year, 'Year'));
     test('workWeek', () => expect(en.workWeek, 'Work week'));
+    test('closed', () => expect(en.closed, 'Closed'));
+    test('addShift', () => expect(en.addShift, '+ Shift'));
+    test('staff', () => expect(en.staff, 'Staff'));
+    test('dragToDay', () => expect(en.dragToDay, 'Drag to day'));
+    test('weekNumberTemplate',
+        () => expect(en.weekNumberTemplate, 'Week {week}'));
   });
 
   group('TideLocalizations.de()', () {
@@ -53,6 +59,29 @@ void main() {
     test('multiWeek', () => expect(de.multiWeek, 'Mehrere Wochen'));
     test('year', () => expect(de.year, 'Jahr'));
     test('workWeek', () => expect(de.workWeek, 'Arbeitswoche'));
+    test('closed', () => expect(de.closed, 'Geschlossen'));
+    test('addShift', () => expect(de.addShift, '+ Schicht'));
+    test('staff', () => expect(de.staff, 'Mitarbeiter'));
+    test('dragToDay', () => expect(de.dragToDay, 'Zum Tag ziehen'));
+    test('weekNumberTemplate',
+        () => expect(de.weekNumberTemplate, 'KW {week}'));
+  });
+
+  group('weekNumberLabel', () {
+    test('English with week 15', () {
+      final en = TideLocalizations.en();
+      expect(en.weekNumberLabel(15), 'Week 15');
+    });
+
+    test('German with week 15', () {
+      final de = TideLocalizations.de();
+      expect(de.weekNumberLabel(15), 'KW 15');
+    });
+
+    test('week 1', () {
+      final en = TideLocalizations.en();
+      expect(en.weekNumberLabel(1), 'Week 1');
+    });
   });
 
   group('formatMoreEvents', () {
@@ -139,10 +168,16 @@ void main() {
         sunday: 'Dom',
         templateEditor: 'Editor de horarios',
         breakLabel: 'Descanso',
+        closed: 'Cerrado',
+        addShift: '+ Turno',
+        staff: 'Personal',
+        dragToDay: 'Arrastrar al dia',
+        weekNumberTemplate: 'Sem {week}',
       );
       expect(custom.today, 'Hoy');
       expect(custom.monthView, 'Mes');
       expect(custom.formatMoreEvents(2), '+2 mas');
+      expect(custom.weekNumberLabel(7), 'Sem 7');
     });
   });
 

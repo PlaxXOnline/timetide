@@ -5,6 +5,11 @@
 /// resource week), multi-resource scheduling, drag & drop, RFC 5545
 /// RRULE recurrence, and iCalendar export/import.
 ///
+/// Companion widgets include [TideShiftPlanner] (weekly resource-based
+/// shift planning with drag & drop), [TideTemplateEditor] (reusable
+/// shift template authoring), and [TideSlotPicker] (date/time slot
+/// selection).
+///
 /// Widget-layer only — imports only `package:flutter/widgets.dart`.
 /// No Material or Cupertino dependency.
 ///
@@ -156,6 +161,12 @@ export 'src/widgets/recurrence_editor/recurrence_editor.dart';
 // Widgets — Template Editor
 export 'src/widgets/template_editor/tide_template_editor.dart';
 export 'src/widgets/template_editor/template_slot_painter.dart';
+
+// Widgets — Shift Planner
+export 'src/widgets/shift_planner/shift_drag_mode.dart';
+export 'src/widgets/shift_planner/tide_kw_badge.dart';
+export 'src/widgets/shift_planner/tide_shift_planner.dart';
+export 'src/widgets/shift_planner/tide_shift_planner_controller.dart';
 
 // Export / Import
 export 'src/core/export/ical_export.dart';

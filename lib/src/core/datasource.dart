@@ -108,6 +108,61 @@ abstract class TideDatasource {
   /// uses domain-specific types instead of [TideEvent].
   TideEventMapping<dynamic>? get mapping => null;
 
+  /// Adds a single event to the datasource.
+  ///
+  /// Subclasses that support mutation should override this method to
+  /// persist the event and emit an [EventsAdded] notification on the
+  /// [changes] stream.
+  Future<void> addEvent(TideEvent event) async {}
+
+  /// Updates a single existing event (matched by [TideEvent.id]).
+  ///
+  /// Subclasses that support mutation should override this method to
+  /// persist the change and emit an [EventsUpdated] notification on the
+  /// [changes] stream.
+  Future<void> updateEvent(TideEvent event) async {}
+
+  /// Removes the event with the given [eventId].
+  ///
+  /// Subclasses that support mutation should override this method to
+  /// remove the event and emit an [EventsRemoved] notification on the
+  /// [changes] stream.
+  Future<void> removeEvent(String eventId) async {}
+
+  /// Adds multiple events at once.
+  ///
+  /// The default implementation iterates over [events] and calls
+  /// [addEvent] for each entry. Subclasses can override this to provide
+  /// a more efficient bulk operation (e.g. a single transaction or a
+  /// single [EventsAdded] notification).
+  Future<void> addEvents(List<TideEvent> events) async {
+    for (final event in events) {
+      await addEvent(event);
+    }
+  }
+
+  /// Updates multiple existing events at once.
+  ///
+  /// The default implementation iterates over [events] and calls
+  /// [updateEvent] for each entry. Subclasses can override this to
+  /// provide a more efficient bulk operation.
+  Future<void> updateEvents(List<TideEvent> events) async {
+    for (final event in events) {
+      await updateEvent(event);
+    }
+  }
+
+  /// Removes multiple events at once, identified by their IDs.
+  ///
+  /// The default implementation iterates over [eventIds] and calls
+  /// [removeEvent] for each entry. Subclasses can override this to
+  /// provide a more efficient bulk operation.
+  Future<void> removeEvents(List<String> eventIds) async {
+    for (final id in eventIds) {
+      await removeEvent(id);
+    }
+  }
+
   /// Releases resources held by this datasource.
   void dispose();
 }

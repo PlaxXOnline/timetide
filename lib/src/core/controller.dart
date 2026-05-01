@@ -389,10 +389,10 @@ class TideController extends ChangeNotifier {
   void addEvent(TideEvent event) {
     final ds = _datasource;
     if (ds is TideInMemoryDatasource) {
-      ds.addEvent(event);
+      unawaited(ds.addEvent(event));
       _pushUndo(_UndoEntry(
-        undo: () => ds.removeEvent(event.id),
-        redo: () => ds.addEvent(event),
+        undo: () => unawaited(ds.removeEvent(event.id)),
+        redo: () => unawaited(ds.addEvent(event)),
       ));
     }
   }
@@ -402,7 +402,7 @@ class TideController extends ChangeNotifier {
     final ds = _datasource;
     if (ds is TideInMemoryDatasource) {
       _captureEventForUndo(ds, event.id, () {
-        ds.updateEvent(event);
+        unawaited(ds.updateEvent(event));
       });
     }
   }
@@ -412,7 +412,7 @@ class TideController extends ChangeNotifier {
     final ds = _datasource;
     if (ds is TideInMemoryDatasource) {
       _captureEventForUndo(ds, eventId, () {
-        ds.removeEvent(eventId);
+        unawaited(ds.removeEvent(eventId));
       });
     }
   }
@@ -433,8 +433,8 @@ class TideController extends ChangeNotifier {
         _pushUndo(_UndoEntry(
           undo: () {
             // Re-add or restore the original event.
-            ds.removeEvent(eventId);
-            ds.addEvent(old);
+            unawaited(ds.removeEvent(eventId));
+            unawaited(ds.addEvent(old));
           },
           redo: () => mutation(),
         ));

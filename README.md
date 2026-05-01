@@ -254,6 +254,27 @@ TideTemplateEditor(
 )
 ```
 
+#### TideShiftPlanner
+
+Companion widget for week-based shift scheduling — sidebar of staff plus a 7-column week grid with drag-and-drop shift creation:
+
+```dart
+final controller = TideShiftPlannerController();
+
+TideShiftPlanner(
+  resources: staff,
+  events: shifts,
+  weekStart: controller.currentWeekStart,
+  controller: controller,
+  closedDaysOfWeek: const {DateTime.sunday},
+  onShiftCreated: (event) => setState(() => shifts.add(event)),
+)
+```
+
+Pair it with `TideKwBadge` to render the ISO-8601 calendar-week label inside any toolbar. Switch `dragMode` to `ShiftDragMode.promptForTime` together with a `shiftPromptBuilder` to surface a custom edit dialog before committing the new shift. For bulk operations call `controller.copyPreviousWeek()`, `controller.generateMonthFromWeek(...)`, or `controller.generateRangeFromWeek(...)`; these are pure functions returning fresh `TideEvent`s for the caller to commit.
+
+See [`docs/14_SHIFT_PLANNER.md`](docs/14_SHIFT_PLANNER.md) for the full spec.
+
 ## Architecture
 
 - **Widget-layer only**: `flutter/widgets.dart` + `gestures.dart` + `services.dart` + `rendering.dart` + `foundation.dart`
@@ -280,6 +301,9 @@ TideTemplateEditor(
 | `TideDateStrip` | Horizontal date picker strip |
 | `TideSlotPicker` | Time slot selection with grouping |
 | `TideTemplateEditor` | Weekly shift/schedule template editor |
+| `TideShiftPlanner` | Sidebar + week-grid shift scheduling companion |
+| `TideShiftPlannerController` | View-state + bulk-copy controller for shift planner |
+| `TideKwBadge` | ISO-8601 calendar-week label |
 | `TideSlot` | Time slot data model |
 | `TideTemplateSlot` | Template slot data model |
 | `TideTimeOfDay` | Widget-layer time-of-day |

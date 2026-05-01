@@ -1,3 +1,26 @@
+## 1.2.0
+
+### Companion Widget — TideShiftPlanner
+- `TideShiftPlanner` — week-based shift scheduling companion widget composing a sidebar resource palette with a 7-column week grid and drag-and-drop shift creation.
+- `cardBuilder` parameter for custom shift card rendering (replaces default `ShiftCard` when provided).
+- `shiftEditPromptBuilder` parameter to enable active edit flows; pairs with `onShiftUpdated` callback (analogous to `shiftPromptBuilder` + `onShiftCreated` for creation).
+- `TideShiftPlannerController` — `ChangeNotifier`-based view-state controller with week navigation (`goToWeek`, `goToPreviousWeek`, `goToNextWeek`) and pure-function bulk-copy helpers (`generateCopiedShifts`, `copyPreviousWeek`, `generateMonthFromWeek`, `generateRangeFromWeek`). Holds no domain state.
+- `TideKwBadge` — toolbar building block rendering the ISO-8601 calendar-week label (e.g. `KW 13` / `Week 13`).
+- `ShiftDragMode` enum (`instantWithDefaults`, `promptForTime`) and `ShiftCopyMode` enum (`replicateWeekly`).
+- Closed-day predicate with three-fold OR logic: `closedDaysOfWeek` (set of weekdays), `closedDates` (set of concrete dates), and `isDayClosed` (custom callback).
+
+### Theme
+- 16 new `TideThemeData` properties for shift-planner styling: `shiftPlannerSidebarWidth`, `shiftPlannerSidebarBackground`, `shiftPlannerCardPadding`, `shiftPlannerCardBorderRadius`, `shiftPlannerCardLeftBorderWidth`, `shiftPlannerClosedDayPatternColor`, `shiftPlannerClosedDayPatternSpacing`, `shiftPlannerColumnHeaderTextStyle`, `shiftPlannerColumnDateStyle`, `shiftPlannerCardTitleStyle`, `shiftPlannerCardTimeStyle`, `shiftPlannerClosedLabelStyle`, `shiftPlannerAddButtonStyle`, `shiftPlannerAddButtonBorderColor`, `shiftPlannerSidebarAvatarTextStyle`, `shiftPlannerSidebarItemTextStyle`.
+
+### Localization
+- Added 5 new `TideLocalizations` strings (DE + EN): `closed`, `addShift`, `staff`, `dragToDay`, and the templated `weekNumberLabel(int week)` helper backed by `weekNumberTemplate`.
+
+### Datasource
+- Bulk methods on `TideDatasource`: `addEvents`, `updateEvents`, `removeEvents` with default `forEach`-based implementations and overrides on `TideInMemoryDatasource`.
+
+### Example
+- New example app at `example/shift_planner/main.dart` demonstrating the planner with controller, toolbar, closed days, and bulk-copy.
+
 ## 1.1.1
 
 ### Documentation

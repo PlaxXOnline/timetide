@@ -44,5 +44,20 @@
   "year": "Year",
   "@year": { "description": "Display name for the year view" },
   "workWeek": "Work week",
-  "@workWeek": { "description": "Display name for the work-week view" }
+  "@workWeek": { "description": "Display name for the work-week view" },
+  "closed": "Closed",
+  "@closed": { "description": "Label shown when a day or resource has no scheduled hours" },
+  "addShift": "+ Shift",
+  "@addShift": { "description": "Label for the add shift action in the shift planner" },
+  "staff": "Staff",
+  "@staff": { "description": "Generic label for staff/employees in the shift planner" },
+  "dragToDay": "Drag to day",
+  "@dragToDay": { "description": "Hint shown while dragging an item over a day target" },
+  "weekNumberTemplate": "Week {week}",
+  "@weekNumberTemplate": {
+    "description": "Template for the calendar week label",
+    "placeholders": {
+      "week": { "type": "int", "example": "15" }
+    }
+  }
 }

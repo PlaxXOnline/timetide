@@ -183,17 +183,17 @@ void main() {
 
     group('getEvents — date range filtering', () {
       test('returns events within range', () async {
-        datasource.addEvent(makeEvent(
+        await datasource.addEvent(makeEvent(
           id: 'e1',
           startTime: june1at9,
           endTime: june1at10,
         ));
-        datasource.addEvent(makeEvent(
+        await datasource.addEvent(makeEvent(
           id: 'e2',
           startTime: june2at9,
           endTime: june2at10,
         ));
-        datasource.addEvent(makeEvent(
+        await datasource.addEvent(makeEvent(
           id: 'e3',
           startTime: june3at9,
           endTime: june3at10,
@@ -208,7 +208,7 @@ void main() {
       });
 
       test('excludes events entirely outside range', () async {
-        datasource.addEvent(makeEvent(
+        await datasource.addEvent(makeEvent(
           id: 'e1',
           startTime: june3at9,
           endTime: june3at10,
@@ -223,7 +223,7 @@ void main() {
 
       test('includes events that overlap range boundaries', () async {
         // Event spans June 1 9:00 - June 2 10:00
-        datasource.addEvent(makeEvent(
+        await datasource.addEvent(makeEvent(
           id: 'spanning',
           startTime: june1at9,
           endTime: june2at10,
@@ -268,7 +268,7 @@ void main() {
           datasource.changes,
           emits(isA<EventsAdded>()),
         );
-        datasource.addEvent(event);
+        await datasource.addEvent(event);
       });
 
       test('addEvents emits EventsAdded with all events', () async {
@@ -284,13 +284,13 @@ void main() {
             2,
           )),
         );
-        datasource.addEvents(events);
+        await datasource.addEvents(events);
       });
 
       test('addEvents with empty list does not emit', () async {
         var emitted = false;
         final sub = datasource.changes.listen((_) => emitted = true);
-        datasource.addEvents([]);
+        await datasource.addEvents([]);
         await Future<void>.delayed(Duration.zero);
         expect(emitted, isFalse);
         await sub.cancel();
@@ -298,25 +298,25 @@ void main() {
 
       test('updateEvent emits EventsUpdated', () async {
         final event = makeEvent(id: 'evt-1');
-        datasource.addEvent(event);
+        await datasource.addEvent(event);
 
         final updated = event.copyWith(subject: 'Updated');
         expectLater(
           datasource.changes,
           emitsThrough(isA<EventsUpdated>()),
         );
-        datasource.updateEvent(updated);
+        await datasource.updateEvent(updated);
       });
 
       test('updateEvent with unknown ID does not emit', () async {
-        datasource.addEvent(makeEvent(id: 'evt-1'));
+        await datasource.addEvent(makeEvent(id: 'evt-1'));
 
         // Wait for addEvent notification to be delivered, then start listening.
         await Future<void>.delayed(Duration.zero);
         final changeFuture = datasource.changes.toList();
 
         // Try to update a non-existent event
-        datasource.updateEvent(makeEvent(id: 'nonexistent'));
+        await datasource.updateEvent(makeEvent(id: 'nonexistent'));
 
         // Close to end the stream
         datasource.dispose();
@@ -327,8 +327,8 @@ void main() {
       });
 
       test('updateEvent replaces the event in storage', () async {
-        datasource.addEvent(makeEvent(id: 'evt-1', subject: 'Original'));
-        datasource.updateEvent(
+        await datasource.addEvent(makeEvent(id: 'evt-1', subject: 'Original'));
+        await datasource.updateEvent(
           makeEvent(id: 'evt-1', subject: 'Modified'),
         );
 
@@ -340,25 +340,25 @@ void main() {
       });
 
       test('removeEvent emits EventsRemoved', () async {
-        datasource.addEvent(makeEvent(id: 'evt-1'));
+        await datasource.addEvent(makeEvent(id: 'evt-1'));
         expectLater(
           datasource.changes,
           emitsThrough(isA<EventsRemoved>()),
         );
-        datasource.removeEvent('evt-1');
+        await datasource.removeEvent('evt-1');
       });
 
       test('removeEvent with unknown ID does not emit', () async {
         final changeFuture = datasource.changes.toList();
-        datasource.removeEvent('nonexistent');
+        await datasource.removeEvent('nonexistent');
         datasource.dispose();
         final changes = await changeFuture;
         expect(changes, isEmpty);
       });
 
       test('removeEvent actually removes the event', () async {
-        datasource.addEvent(makeEvent(id: 'evt-1'));
-        datasource.removeEvent('evt-1');
+        await datasource.addEvent(makeEvent(id: 'evt-1'));
+        await datasource.removeEvent('evt-1');
 
         final events = await datasource.getEvents(
           DateTime(2024),
@@ -461,7 +461,7 @@ void main() {
         final sub1 = datasource.changes.listen(results1.add);
         final sub2 = datasource.changes.listen(results2.add);
 
-        datasource.addEvent(makeEvent());
+        await datasource.addEvent(makeEvent());
 
         await Future<void>.delayed(Duration.zero);
 
@@ -477,9 +477,9 @@ void main() {
         final changes = <TideDatasourceChange>[];
         final sub = datasource.changes.listen(changes.add);
 
-        datasource.addEvent(makeEvent(id: 'e1'));
-        datasource.updateEvent(makeEvent(id: 'e1', subject: 'Updated'));
-        datasource.removeEvent('e1');
+        await datasource.addEvent(makeEvent(id: 'e1'));
+        await datasource.updateEvent(makeEvent(id: 'e1', subject: 'Updated'));
+        await datasource.removeEvent('e1');
         datasource.addResource(makeResource());
         datasource.addTimeRegion(makeRegion());
 

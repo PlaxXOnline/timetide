@@ -107,6 +107,23 @@ class TideLocalizations {
   /// Label for break periods.
   final String breakLabel;
 
+  /// Label shown when a day or resource has no scheduled hours.
+  final String closed;
+
+  /// Label for the "add shift" action in the shift planner.
+  final String addShift;
+
+  /// Generic label for staff/employees in the shift planner.
+  final String staff;
+
+  /// Hint shown while dragging an item over a day target.
+  final String dragToDay;
+
+  /// Template for the calendar week label.
+  ///
+  /// Use `{week}` as a placeholder for the week number, e.g. `"Week {week}"`.
+  final String weekNumberTemplate;
+
   /// Creates a [TideLocalizations] with the given strings.
   const TideLocalizations({
     required this.today,
@@ -141,6 +158,11 @@ class TideLocalizations {
     required this.sunday,
     required this.templateEditor,
     required this.breakLabel,
+    required this.closed,
+    required this.addShift,
+    required this.staff,
+    required this.dragToDay,
+    required this.weekNumberTemplate,
   });
 
   /// English localizations.
@@ -178,6 +200,11 @@ class TideLocalizations {
       sunday: 'Sun',
       templateEditor: 'Schedule Editor',
       breakLabel: 'Break',
+      closed: 'Closed',
+      addShift: '+ Shift',
+      staff: 'Staff',
+      dragToDay: 'Drag to day',
+      weekNumberTemplate: 'Week {week}',
     );
   }
 
@@ -216,7 +243,19 @@ class TideLocalizations {
       sunday: 'So',
       templateEditor: 'Wochenplan-Editor',
       breakLabel: 'Pause',
+      closed: 'Geschlossen',
+      addShift: '+ Schicht',
+      staff: 'Mitarbeiter',
+      dragToDay: 'Zum Tag ziehen',
+      weekNumberTemplate: 'KW {week}',
     );
+  }
+
+  /// Formats the [weekNumberTemplate] by replacing `{week}` with [week].
+  ///
+  /// Returns a localized week label such as `KW 15` (DE) or `Week 15` (EN).
+  String weekNumberLabel(int week) {
+    return weekNumberTemplate.replaceAll('{week}', week.toString());
   }
 
   /// Returns the abbreviated weekday name for the given ISO 8601 weekday
@@ -274,7 +313,12 @@ class TideLocalizations {
         saturday == other.saturday &&
         sunday == other.sunday &&
         templateEditor == other.templateEditor &&
-        breakLabel == other.breakLabel;
+        breakLabel == other.breakLabel &&
+        closed == other.closed &&
+        addShift == other.addShift &&
+        staff == other.staff &&
+        dragToDay == other.dragToDay &&
+        weekNumberTemplate == other.weekNumberTemplate;
   }
 
   @override
@@ -315,6 +359,11 @@ class TideLocalizations {
         sunday,
         templateEditor,
         breakLabel,
+        closed,
+        addShift,
+        staff,
+        dragToDay,
+        weekNumberTemplate,
       ),
     );
   }

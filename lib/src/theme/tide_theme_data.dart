@@ -202,6 +202,59 @@ class TideThemeData {
   /// Text style for day column headers in the template editor.
   final TextStyle templateEditorHeaderTextStyle;
 
+  // ─── Shift Planner ───────────────────────────────────
+
+  /// Width of the resource sidebar in the shift planner.
+  final double shiftPlannerSidebarWidth;
+
+  /// Background color of the shift planner sidebar.
+  final Color shiftPlannerSidebarBackground;
+
+  /// Internal padding of shift cards.
+  final EdgeInsets shiftPlannerCardPadding;
+
+  /// Border radius applied to shift cards.
+  final BorderRadius shiftPlannerCardBorderRadius;
+
+  /// Width of the colored left border (status accent) on shift cards.
+  final double shiftPlannerCardLeftBorderWidth;
+
+  /// Color of the diagonal hatching pattern used to mark closed days.
+  final Color shiftPlannerClosedDayPatternColor;
+
+  /// Spacing of the closed-day hatching lines.
+  final double shiftPlannerClosedDayPatternSpacing;
+
+  /// Text style for column headers (weekday name) in the shift planner.
+  final TextStyle shiftPlannerColumnHeaderTextStyle;
+
+  /// Text style for the date number underneath the column header.
+  final TextStyle shiftPlannerColumnDateStyle;
+
+  /// Text style for the title (employee first name) on a shift card.
+  final TextStyle shiftPlannerCardTitleStyle;
+
+  /// Text style for the time range printed on a shift card.
+  final TextStyle shiftPlannerCardTimeStyle;
+
+  /// Text style for the centered "Closed" label on a closed-day column.
+  final TextStyle shiftPlannerClosedLabelStyle;
+
+  /// Text style for the "+ Shift" button label at the bottom of a day column.
+  final TextStyle shiftPlannerAddButtonStyle;
+
+  /// Border color for the "+ Shift" button.
+  final Color shiftPlannerAddButtonBorderColor;
+
+  /// Text style for the avatar initial in the resource sidebar.
+  final TextStyle shiftPlannerSidebarAvatarTextStyle;
+
+  /// Text style for the resource name in the sidebar list item.
+  final TextStyle shiftPlannerSidebarItemTextStyle;
+
+  /// Text style for the small avatar initial rendered on a shift card.
+  final TextStyle shiftPlannerCardAvatarTextStyle;
+
   /// Creates a [TideThemeData] with sensible defaults.
   const TideThemeData({
     // Global
@@ -316,6 +369,57 @@ class TideThemeData {
       fontWeight: FontWeight.w600,
       color: Color(0xFF424242),
     ),
+    // Shift Planner
+    this.shiftPlannerSidebarWidth = 240.0,
+    this.shiftPlannerSidebarBackground = const Color(0xFFF8FAFC),
+    this.shiftPlannerCardPadding = const EdgeInsets.all(8),
+    this.shiftPlannerCardBorderRadius =
+        const BorderRadius.all(Radius.circular(6)),
+    this.shiftPlannerCardLeftBorderWidth = 3.0,
+    this.shiftPlannerClosedDayPatternColor = const Color(0x14000000),
+    this.shiftPlannerClosedDayPatternSpacing = 8.0,
+    this.shiftPlannerColumnHeaderTextStyle = const TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF212121),
+    ),
+    this.shiftPlannerColumnDateStyle = const TextStyle(
+      fontSize: 11,
+      color: Color(0xFF757575),
+    ),
+    this.shiftPlannerCardTitleStyle = const TextStyle(
+      fontSize: 11,
+      color: Color(0xFF1F2937),
+      fontWeight: FontWeight.w600,
+    ),
+    this.shiftPlannerCardTimeStyle = const TextStyle(
+      fontSize: 10.5,
+      color: Color(0xB81F2937),
+    ),
+    this.shiftPlannerClosedLabelStyle = const TextStyle(
+      fontSize: 12,
+      color: Color(0xFF757575),
+    ),
+    this.shiftPlannerAddButtonStyle = const TextStyle(
+      fontSize: 12,
+      color: Color(0xFF757575),
+    ),
+    this.shiftPlannerAddButtonBorderColor = const Color(0x33000000),
+    this.shiftPlannerSidebarAvatarTextStyle = const TextStyle(
+      fontSize: 12,
+      color: Color(0xFFFFFFFF),
+      fontWeight: FontWeight.w600,
+    ),
+    this.shiftPlannerSidebarItemTextStyle = const TextStyle(
+      fontSize: 13,
+      color: Color(0xFF212121),
+      fontWeight: FontWeight.w500,
+    ),
+    this.shiftPlannerCardAvatarTextStyle = const TextStyle(
+      fontSize: 9,
+      color: Color(0xFFFFFFFF),
+      fontWeight: FontWeight.w600,
+    ),
   });
 
   /// Returns a copy of this theme with the given fields replaced.
@@ -389,6 +493,24 @@ class TideThemeData {
     double? templateEditorBreakPatternSpacing,
     BorderRadius? templateEditorSlotBorderRadius,
     TextStyle? templateEditorHeaderTextStyle,
+    // Shift Planner
+    double? shiftPlannerSidebarWidth,
+    Color? shiftPlannerSidebarBackground,
+    EdgeInsets? shiftPlannerCardPadding,
+    BorderRadius? shiftPlannerCardBorderRadius,
+    double? shiftPlannerCardLeftBorderWidth,
+    Color? shiftPlannerClosedDayPatternColor,
+    double? shiftPlannerClosedDayPatternSpacing,
+    TextStyle? shiftPlannerColumnHeaderTextStyle,
+    TextStyle? shiftPlannerColumnDateStyle,
+    TextStyle? shiftPlannerCardTitleStyle,
+    TextStyle? shiftPlannerCardTimeStyle,
+    TextStyle? shiftPlannerClosedLabelStyle,
+    TextStyle? shiftPlannerAddButtonStyle,
+    Color? shiftPlannerAddButtonBorderColor,
+    TextStyle? shiftPlannerSidebarAvatarTextStyle,
+    TextStyle? shiftPlannerSidebarItemTextStyle,
+    TextStyle? shiftPlannerCardAvatarTextStyle,
   }) {
     return TideThemeData(
       // Global
@@ -477,6 +599,42 @@ class TideThemeData {
           this.templateEditorSlotBorderRadius,
       templateEditorHeaderTextStyle: templateEditorHeaderTextStyle ??
           this.templateEditorHeaderTextStyle,
+      // Shift Planner
+      shiftPlannerSidebarWidth:
+          shiftPlannerSidebarWidth ?? this.shiftPlannerSidebarWidth,
+      shiftPlannerSidebarBackground:
+          shiftPlannerSidebarBackground ?? this.shiftPlannerSidebarBackground,
+      shiftPlannerCardPadding:
+          shiftPlannerCardPadding ?? this.shiftPlannerCardPadding,
+      shiftPlannerCardBorderRadius:
+          shiftPlannerCardBorderRadius ?? this.shiftPlannerCardBorderRadius,
+      shiftPlannerCardLeftBorderWidth: shiftPlannerCardLeftBorderWidth ??
+          this.shiftPlannerCardLeftBorderWidth,
+      shiftPlannerClosedDayPatternColor: shiftPlannerClosedDayPatternColor ??
+          this.shiftPlannerClosedDayPatternColor,
+      shiftPlannerClosedDayPatternSpacing:
+          shiftPlannerClosedDayPatternSpacing ??
+              this.shiftPlannerClosedDayPatternSpacing,
+      shiftPlannerColumnHeaderTextStyle: shiftPlannerColumnHeaderTextStyle ??
+          this.shiftPlannerColumnHeaderTextStyle,
+      shiftPlannerColumnDateStyle:
+          shiftPlannerColumnDateStyle ?? this.shiftPlannerColumnDateStyle,
+      shiftPlannerCardTitleStyle:
+          shiftPlannerCardTitleStyle ?? this.shiftPlannerCardTitleStyle,
+      shiftPlannerCardTimeStyle:
+          shiftPlannerCardTimeStyle ?? this.shiftPlannerCardTimeStyle,
+      shiftPlannerClosedLabelStyle:
+          shiftPlannerClosedLabelStyle ?? this.shiftPlannerClosedLabelStyle,
+      shiftPlannerAddButtonStyle:
+          shiftPlannerAddButtonStyle ?? this.shiftPlannerAddButtonStyle,
+      shiftPlannerAddButtonBorderColor: shiftPlannerAddButtonBorderColor ??
+          this.shiftPlannerAddButtonBorderColor,
+      shiftPlannerSidebarAvatarTextStyle: shiftPlannerSidebarAvatarTextStyle ??
+          this.shiftPlannerSidebarAvatarTextStyle,
+      shiftPlannerSidebarItemTextStyle: shiftPlannerSidebarItemTextStyle ??
+          this.shiftPlannerSidebarItemTextStyle,
+      shiftPlannerCardAvatarTextStyle: shiftPlannerCardAvatarTextStyle ??
+          this.shiftPlannerCardAvatarTextStyle,
     );
   }
 
@@ -604,6 +762,61 @@ class TideThemeData {
           a.templateEditorHeaderTextStyle,
           b.templateEditorHeaderTextStyle,
           t)!,
+      // Shift Planner
+      shiftPlannerSidebarWidth: lerpDouble(
+          a.shiftPlannerSidebarWidth, b.shiftPlannerSidebarWidth, t)!,
+      shiftPlannerSidebarBackground: Color.lerp(
+          a.shiftPlannerSidebarBackground,
+          b.shiftPlannerSidebarBackground,
+          t)!,
+      shiftPlannerCardPadding: EdgeInsets.lerp(
+          a.shiftPlannerCardPadding, b.shiftPlannerCardPadding, t)!,
+      shiftPlannerCardBorderRadius: BorderRadius.lerp(
+          a.shiftPlannerCardBorderRadius,
+          b.shiftPlannerCardBorderRadius,
+          t)!,
+      shiftPlannerCardLeftBorderWidth: lerpDouble(
+          a.shiftPlannerCardLeftBorderWidth,
+          b.shiftPlannerCardLeftBorderWidth,
+          t)!,
+      shiftPlannerClosedDayPatternColor: Color.lerp(
+          a.shiftPlannerClosedDayPatternColor,
+          b.shiftPlannerClosedDayPatternColor,
+          t)!,
+      shiftPlannerClosedDayPatternSpacing: lerpDouble(
+          a.shiftPlannerClosedDayPatternSpacing,
+          b.shiftPlannerClosedDayPatternSpacing,
+          t)!,
+      shiftPlannerColumnHeaderTextStyle: TextStyle.lerp(
+          a.shiftPlannerColumnHeaderTextStyle,
+          b.shiftPlannerColumnHeaderTextStyle,
+          t)!,
+      shiftPlannerColumnDateStyle: TextStyle.lerp(
+          a.shiftPlannerColumnDateStyle, b.shiftPlannerColumnDateStyle, t)!,
+      shiftPlannerCardTitleStyle: TextStyle.lerp(
+          a.shiftPlannerCardTitleStyle, b.shiftPlannerCardTitleStyle, t)!,
+      shiftPlannerCardTimeStyle: TextStyle.lerp(
+          a.shiftPlannerCardTimeStyle, b.shiftPlannerCardTimeStyle, t)!,
+      shiftPlannerClosedLabelStyle: TextStyle.lerp(
+          a.shiftPlannerClosedLabelStyle, b.shiftPlannerClosedLabelStyle, t)!,
+      shiftPlannerAddButtonStyle: TextStyle.lerp(
+          a.shiftPlannerAddButtonStyle, b.shiftPlannerAddButtonStyle, t)!,
+      shiftPlannerAddButtonBorderColor: Color.lerp(
+          a.shiftPlannerAddButtonBorderColor,
+          b.shiftPlannerAddButtonBorderColor,
+          t)!,
+      shiftPlannerSidebarAvatarTextStyle: TextStyle.lerp(
+          a.shiftPlannerSidebarAvatarTextStyle,
+          b.shiftPlannerSidebarAvatarTextStyle,
+          t)!,
+      shiftPlannerSidebarItemTextStyle: TextStyle.lerp(
+          a.shiftPlannerSidebarItemTextStyle,
+          b.shiftPlannerSidebarItemTextStyle,
+          t)!,
+      shiftPlannerCardAvatarTextStyle: TextStyle.lerp(
+          a.shiftPlannerCardAvatarTextStyle,
+          b.shiftPlannerCardAvatarTextStyle,
+          t)!,
     );
   }
 
@@ -669,7 +882,32 @@ class TideThemeData {
             other.templateEditorBreakPatternSpacing &&
         templateEditorSlotBorderRadius ==
             other.templateEditorSlotBorderRadius &&
-        templateEditorHeaderTextStyle == other.templateEditorHeaderTextStyle;
+        templateEditorHeaderTextStyle == other.templateEditorHeaderTextStyle &&
+        shiftPlannerSidebarWidth == other.shiftPlannerSidebarWidth &&
+        shiftPlannerSidebarBackground == other.shiftPlannerSidebarBackground &&
+        shiftPlannerCardPadding == other.shiftPlannerCardPadding &&
+        shiftPlannerCardBorderRadius == other.shiftPlannerCardBorderRadius &&
+        shiftPlannerCardLeftBorderWidth ==
+            other.shiftPlannerCardLeftBorderWidth &&
+        shiftPlannerClosedDayPatternColor ==
+            other.shiftPlannerClosedDayPatternColor &&
+        shiftPlannerClosedDayPatternSpacing ==
+            other.shiftPlannerClosedDayPatternSpacing &&
+        shiftPlannerColumnHeaderTextStyle ==
+            other.shiftPlannerColumnHeaderTextStyle &&
+        shiftPlannerColumnDateStyle == other.shiftPlannerColumnDateStyle &&
+        shiftPlannerCardTitleStyle == other.shiftPlannerCardTitleStyle &&
+        shiftPlannerCardTimeStyle == other.shiftPlannerCardTimeStyle &&
+        shiftPlannerClosedLabelStyle == other.shiftPlannerClosedLabelStyle &&
+        shiftPlannerAddButtonStyle == other.shiftPlannerAddButtonStyle &&
+        shiftPlannerAddButtonBorderColor ==
+            other.shiftPlannerAddButtonBorderColor &&
+        shiftPlannerSidebarAvatarTextStyle ==
+            other.shiftPlannerSidebarAvatarTextStyle &&
+        shiftPlannerSidebarItemTextStyle ==
+            other.shiftPlannerSidebarItemTextStyle &&
+        shiftPlannerCardAvatarTextStyle ==
+            other.shiftPlannerCardAvatarTextStyle;
   }
 
   @override
@@ -736,6 +974,27 @@ class TideThemeData {
         templateEditorBreakPatternSpacing,
         templateEditorSlotBorderRadius,
         templateEditorHeaderTextStyle,
+      ),
+      Object.hash(
+        shiftPlannerSidebarWidth,
+        shiftPlannerSidebarBackground,
+        shiftPlannerCardPadding,
+        shiftPlannerCardBorderRadius,
+        shiftPlannerCardLeftBorderWidth,
+        shiftPlannerClosedDayPatternColor,
+        shiftPlannerClosedDayPatternSpacing,
+        shiftPlannerColumnHeaderTextStyle,
+        shiftPlannerColumnDateStyle,
+      ),
+      Object.hash(
+        shiftPlannerCardTitleStyle,
+        shiftPlannerCardTimeStyle,
+        shiftPlannerClosedLabelStyle,
+        shiftPlannerAddButtonStyle,
+        shiftPlannerAddButtonBorderColor,
+        shiftPlannerSidebarAvatarTextStyle,
+        shiftPlannerSidebarItemTextStyle,
+        shiftPlannerCardAvatarTextStyle,
       ),
     );
   }

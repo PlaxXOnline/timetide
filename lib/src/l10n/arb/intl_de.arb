@@ -44,5 +44,20 @@
   "year": "Jahr",
   "@year": { "description": "Anzeigename für die Jahresansicht" },
   "workWeek": "Arbeitswoche",
-  "@workWeek": { "description": "Anzeigename für die Arbeitswochenansicht" }
+  "@workWeek": { "description": "Anzeigename für die Arbeitswochenansicht" },
+  "closed": "Geschlossen",
+  "@closed": { "description": "Label wenn ein Tag oder Resource keine Öffnungszeiten hat" },
+  "addShift": "+ Schicht",
+  "@addShift": { "description": "Label für die Aktion 'Schicht hinzufügen' im Schichtplaner" },
+  "staff": "Mitarbeiter",
+  "@staff": { "description": "Generisches Label für Mitarbeiter im Schichtplaner" },
+  "dragToDay": "Zum Tag ziehen",
+  "@dragToDay": { "description": "Hinweis während ein Element über ein Tagesziel gezogen wird" },
+  "weekNumberTemplate": "KW {week}",
+  "@weekNumberTemplate": {
+    "description": "Template für das Kalenderwochen-Label",
+    "placeholders": {
+      "week": { "type": "int", "example": "15" }
+    }
+  }
 }
