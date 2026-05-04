@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  A comprehensive Flutter scheduling calendar — 13 views, companion booking widgets, multi-resource scheduling, drag & drop, RRULE recurrence, iCalendar import/export.
+  A comprehensive Flutter scheduling calendar — 13 views, companion booking widgets, multi-resource scheduling, drag & drop, RRULE recurrence, iCalendar import/export, weekly shift planning.
   <br/>
   <strong>Widget-layer only.</strong> No Material or Cupertino dependency.
 </p>
@@ -18,7 +18,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  timetide: ^1.1.1
+  timetide: ^1.2.0
 ```
 
 Then run:
@@ -258,6 +258,10 @@ TideTemplateEditor(
 
 Companion widget for week-based shift scheduling — sidebar of staff plus a 7-column week grid with drag-and-drop shift creation:
 
+<p align="center">
+  <img src="docs/screenshots/shift-planner-light.png" alt="timetide shift planner" width="100%" />
+</p>
+
 ```dart
 final controller = TideShiftPlannerController();
 
@@ -273,7 +277,9 @@ TideShiftPlanner(
 
 Pair it with `TideKwBadge` to render the ISO-8601 calendar-week label inside any toolbar. Switch `dragMode` to `ShiftDragMode.promptForTime` together with a `shiftPromptBuilder` to surface a custom edit dialog before committing the new shift. For bulk operations call `controller.copyPreviousWeek()`, `controller.generateMonthFromWeek(...)`, or `controller.generateRangeFromWeek(...)`; these are pure functions returning fresh `TideEvent`s for the caller to commit.
 
-See [`docs/14_SHIFT_PLANNER.md`](docs/14_SHIFT_PLANNER.md) for the full spec.
+Additional hooks: `cardBuilder` for custom shift card rendering, `shiftEditPromptBuilder` paired with `onShiftUpdated` for active edit flows (analogous to `shiftPromptBuilder` + `onShiftCreated` for creation).
+
+See [`docs/15_SHIFT_PLANNER.md`](docs/15_SHIFT_PLANNER.md) for the full spec.
 
 ## Architecture
 

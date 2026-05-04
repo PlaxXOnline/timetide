@@ -10,7 +10,7 @@
 - Closed-day predicate with three-fold OR logic: `closedDaysOfWeek` (set of weekdays), `closedDates` (set of concrete dates), and `isDayClosed` (custom callback).
 
 ### Theme
-- 16 new `TideThemeData` properties for shift-planner styling: `shiftPlannerSidebarWidth`, `shiftPlannerSidebarBackground`, `shiftPlannerCardPadding`, `shiftPlannerCardBorderRadius`, `shiftPlannerCardLeftBorderWidth`, `shiftPlannerClosedDayPatternColor`, `shiftPlannerClosedDayPatternSpacing`, `shiftPlannerColumnHeaderTextStyle`, `shiftPlannerColumnDateStyle`, `shiftPlannerCardTitleStyle`, `shiftPlannerCardTimeStyle`, `shiftPlannerClosedLabelStyle`, `shiftPlannerAddButtonStyle`, `shiftPlannerAddButtonBorderColor`, `shiftPlannerSidebarAvatarTextStyle`, `shiftPlannerSidebarItemTextStyle`.
+- 17 new `TideThemeData` properties for shift-planner styling: `shiftPlannerSidebarWidth`, `shiftPlannerSidebarBackground`, `shiftPlannerCardPadding`, `shiftPlannerCardBorderRadius`, `shiftPlannerCardLeftBorderWidth`, `shiftPlannerClosedDayPatternColor`, `shiftPlannerClosedDayPatternSpacing`, `shiftPlannerColumnHeaderTextStyle`, `shiftPlannerColumnDateStyle`, `shiftPlannerCardTitleStyle`, `shiftPlannerCardTimeStyle`, `shiftPlannerClosedLabelStyle`, `shiftPlannerAddButtonStyle`, `shiftPlannerAddButtonBorderColor`, `shiftPlannerSidebarAvatarTextStyle`, `shiftPlannerSidebarItemTextStyle`, `shiftPlannerCardAvatarTextStyle`.
 
 ### Localization
 - Added 5 new `TideLocalizations` strings (DE + EN): `closed`, `addShift`, `staff`, `dragToDay`, and the templated `weekNumberLabel(int week)` helper backed by `weekNumberTemplate`.

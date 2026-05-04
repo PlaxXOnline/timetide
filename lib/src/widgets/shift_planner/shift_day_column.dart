@@ -212,6 +212,10 @@ class _DiagonalHatchPainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
+    // Clip so diagonal strokes never bleed into neighbouring day columns.
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+
     // Lines go bottom-left → top-right (135°). Iterate by horizontal offset
     // so both halves of the rectangle are covered.
     final maxOffset = size.width + size.height;
@@ -222,6 +226,8 @@ class _DiagonalHatchPainter extends CustomPainter {
         paint,
       );
     }
+
+    canvas.restore();
   }
 
   @override
