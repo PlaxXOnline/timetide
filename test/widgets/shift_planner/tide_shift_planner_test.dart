@@ -793,6 +793,83 @@ void main() {
     });
   });
 
+  group('TideShiftPlanner — palette builders forwarding', () {
+    testWidgets('paletteHeaderBuilder is forwarded to ShiftResourcePalette',
+        (tester) async {
+      await tester.pumpWidget(_host(
+        child: TideShiftPlanner(
+          resources: _resources,
+          events: const <TideEvent>[],
+          weekStart: monday,
+          paletteHeaderBuilder: (_) => const Text('PALETTE-HEADER'),
+        ),
+      ));
+
+      expect(find.text('PALETTE-HEADER'), findsOneWidget);
+      final palette = tester.widget<ShiftResourcePalette>(
+        find.byType(ShiftResourcePalette),
+      );
+      expect(palette.headerBuilder, isNotNull);
+    });
+
+    testWidgets('paletteFooterBuilder is forwarded to ShiftResourcePalette',
+        (tester) async {
+      await tester.pumpWidget(_host(
+        child: TideShiftPlanner(
+          resources: _resources,
+          events: const <TideEvent>[],
+          weekStart: monday,
+          paletteFooterBuilder: (_) => const Text('PALETTE-FOOTER'),
+        ),
+      ));
+
+      expect(find.text('PALETTE-FOOTER'), findsOneWidget);
+      final palette = tester.widget<ShiftResourcePalette>(
+        find.byType(ShiftResourcePalette),
+      );
+      expect(palette.footerBuilder, isNotNull);
+    });
+
+    testWidgets(
+        'paletteDragFeedbackBuilder is forwarded to ShiftResourcePalette',
+        (tester) async {
+      Widget feedback(TideExternalDragData data) =>
+          Text('FB-${data.subject}');
+
+      await tester.pumpWidget(_host(
+        child: TideShiftPlanner(
+          resources: _resources,
+          events: const <TideEvent>[],
+          weekStart: monday,
+          paletteDragFeedbackBuilder: feedback,
+        ),
+      ));
+
+      final palette = tester.widget<ShiftResourcePalette>(
+        find.byType(ShiftResourcePalette),
+      );
+      expect(palette.dragFeedbackBuilder, same(feedback));
+    });
+
+    testWidgets(
+        'palette builders default to null when not provided', (tester) async {
+      await tester.pumpWidget(_host(
+        child: TideShiftPlanner(
+          resources: _resources,
+          events: const <TideEvent>[],
+          weekStart: monday,
+        ),
+      ));
+
+      final palette = tester.widget<ShiftResourcePalette>(
+        find.byType(ShiftResourcePalette),
+      );
+      expect(palette.headerBuilder, isNull);
+      expect(palette.footerBuilder, isNull);
+      expect(palette.dragFeedbackBuilder, isNull);
+    });
+  });
+
   group('TideShiftPlanner — localization', () {
     testWidgets('localeOverride is used when provided', (tester) async {
       await tester.pumpWidget(_host(

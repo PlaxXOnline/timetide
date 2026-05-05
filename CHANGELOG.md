@@ -1,3 +1,8 @@
+## 1.2.1
+
+### Fixes
+- `TideShiftPlanner` now forwards `headerBuilder`, `footerBuilder`, and `dragFeedbackBuilder` to its internal `ShiftResourcePalette`. Exposed as new `paletteHeaderBuilder`, `paletteFooterBuilder`, and `paletteDragFeedbackBuilder` parameters so consumers can render branding, hint boxes, or custom drag-ghosts above/below the resource list and under the pointer without forking the widget.
+
 ## 1.2.0
 
 ### Companion Widget — TideShiftPlanner

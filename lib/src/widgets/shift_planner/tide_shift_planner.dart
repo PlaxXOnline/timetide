@@ -117,6 +117,9 @@ class TideShiftPlanner extends StatefulWidget {
     this.shiftPromptBuilder,
     this.shiftEditPromptBuilder,
     this.cardBuilder,
+    this.paletteHeaderBuilder,
+    this.paletteFooterBuilder,
+    this.paletteDragFeedbackBuilder,
     this.localeOverride,
   });
 
@@ -206,6 +209,24 @@ class TideShiftPlanner extends StatefulWidget {
   /// Optional builder to replace the default shift card. When provided,
   /// this is invoked for every event with the matching resource.
   final TideShiftCardBuilder? cardBuilder;
+
+  /// Optional builder for a custom widget rendered above the resource rows
+  /// in the sidebar palette. Forwarded to
+  /// [ShiftResourcePalette.headerBuilder].
+  ///
+  /// Use this to inject branding, a section title, or a hint box on top of
+  /// the palette without forking the widget.
+  final WidgetBuilder? paletteHeaderBuilder;
+
+  /// Optional builder for a custom widget rendered below the resource rows
+  /// in the sidebar palette. Forwarded to
+  /// [ShiftResourcePalette.footerBuilder].
+  final WidgetBuilder? paletteFooterBuilder;
+
+  /// Optional builder for the drag-feedback widget shown under the pointer
+  /// while a resource row is being dragged. Forwarded to
+  /// [ShiftResourcePalette.dragFeedbackBuilder].
+  final Widget Function(TideExternalDragData data)? paletteDragFeedbackBuilder;
 
   /// Optional [TideLocalizations] override. Falls back to
   /// [TideLocalizations.en] when not provided. The widget never reads from
@@ -390,6 +411,9 @@ class _TideShiftPlannerState extends State<TideShiftPlanner> {
             resources: widget.resources,
             dragMode: widget.dragMode,
             defaultShiftDuration: _defaultShiftDuration,
+            headerBuilder: widget.paletteHeaderBuilder,
+            footerBuilder: widget.paletteFooterBuilder,
+            dragFeedbackBuilder: widget.paletteDragFeedbackBuilder,
           ),
           Expanded(
             child: ShiftWeekGrid(
